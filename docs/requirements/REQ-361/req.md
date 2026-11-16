@@ -1,34 +1,35 @@
-# REQ-361 User can rotate, resize and delete furniture
+# REQ-361 User can rotate and delete furniture
 
 Feature: FEAT-1142 · Decision: DEC-396 · Group: 2. Furnish and edit
-Order: 4 of 8
+Order: 4 of 9
 Depends on: User can select and move furniture inside the walls
 Goals: G1
 
 ## Purpose
-As a homeowner or interior designer, I can rotate, resize and delete a selected furniture item in the 2D plan.
+As a homeowner or interior designer, I can rotate and delete a selected furniture item in the 2D plan.
 
 ## Behaviour
-- With an item selected, the user can rotate it, resize it or delete it.
-- The selected item shows a rotation ring around it with a knob and the current angle.
-- Rotation moves in steps of 10°: dragging the knob snaps to the nearest 10°, and a Rotate button turns the item 10° (decided by the user on 2026-11-16).
-- The item stays inside the room walls after a rotate or resize.
-- Each edit updates the room JSON straight away (rotation, size, or removal of the item).
+- The selected item shows a rotation ring around it, with a knob and the current angle.
+- The user rotates the item with the mouse by dragging the knob around the ring. Rotation moves in steps of **10°**: the item snaps to the nearest 10° (0, 10, 20 ... 350). A Rotate button turns it 10° clockwise.
+- The angle is the item's **facing**, stored as `rotation` in the room JSON: degrees clockwise, where 0 = the front faces the bottom wall (see [room-plan-schema.md](../../project/room-plan-schema.md)).
+- The item rotates around its centre and must stay inside the walls.
+- Delete removes the selected item from the plan and from `items` in the room JSON.
+- **No resizing:** item sizes come from the catalog and cannot be changed (user decision, 2026-11-16).
+- Rotating near other items follows the clearance rule (REQ-366).
 
 ## Acceptance criteria
-- Rotating a selected item changes its rotation in the plan and in the room JSON straight away.
-- Each rotate step turns the item by 10° (0, 10, 20 ... 350), and the current angle is shown on the ring.
-- Resizing a selected item changes its size in the plan and in the room JSON straight away.
-- A rotate or resize that would take the item outside the walls is not applied.
+- Dragging the knob rotates the selected item in 10° steps. The angle is shown on the ring and in the panel, and `rotation` in the room JSON matches it straight away.
+- The Rotate button turns the selected item 10° clockwise (350 → 0).
+- A rotation that would take any part of the item outside the walls is not applied; the item keeps its last angle.
 - Deleting a selected item removes it from the plan and from the room JSON.
+- No control is offered to change an item's size.
 
 ## Source documents
 - docs/project/source/features.md: #4 Edit the 2D plan (REQ-297, REQ-299)
+- docs/project/room-plan-schema.md
 - docs/project/intent.md: G1
+- User answers, 2026-11-16: 10° rotation steps with the mouse; no resizing
 
 ## Open questions
-- Besides the 10° steps, is free rotation (no snap) or typing an exact angle also allowed?
-- Is resizing done with handles, by typing a size in feet, or both? Is there a minimum or maximum size?
-- Does resizing keep the item's proportions?
 - Is a delete confirmed first? Is there undo?
-- Can the user change an item's colour? The room JSON holds a colour, but no feature edits it.
+- Can an exact angle be typed in the panel (still in 10° steps)?
