@@ -10,6 +10,8 @@ As a homeowner or interior designer, I can enter a room width and length in feet
 
 ## Behaviour
 - The user enters a width and a length in feet and confirms.
+- Width and length must each be **6 to 30 ft**, in 0.25 ft steps, to fit normal Indian rooms. Any other value (empty, not a number, out of range) shows a message under the field, for example "Width must be between 6 and 30 ft.", and Create room does nothing.
+- The wall height is **10 ft** for every room. It is fixed and not asked for (user decision, 2026-11-16).
 - A room JSON is created in the format of [room-plan-schema.md](../../project/room-plan-schema.md) (schema v1.0):
   - units are feet, and the origin (0, 0) is the top-left corner of the room floor;
   - the room has `width`, `length` and four walls (`top`, `right`, `bottom`, `left`);
@@ -22,17 +24,15 @@ As a homeowner or interior designer, I can enter a room width and length in feet
 ## Acceptance criteria
 - Entering a width and length in feet and confirming shows a new, empty rectangular room in the 2D plan.
 - The room drawn in the plan measures the entered width and length on the ruler and grid.
-- The room JSON has `schemaVersion` "1.0", `units` "ft", `origin` "top-left", the entered width and length, four walls that match them, and an empty `items` list. It passes the schema check.
+- A width or length below 6 ft, above 30 ft, or not a number shows the message, and no room is created.
+- The room JSON has `schemaVersion` "1.0", `units` "ft", `origin` "top-left", the entered width and length, `height` 10, four walls that match them, and an empty `items` list. It passes the schema check.
 - Once the room is created, the editor offers no way to change the room size.
 
 ## Source documents
 - docs/project/source/features.md: #1 Room plan JSON (REQ-290), #2 Create a room (REQ-291), #3 2D plan renders from JSON (REQ-296)
 - docs/project/room-plan-schema.md
 - docs/project/intent.md: G3, G4
-- User answers, 2026-11-16: rectangle only; room size cannot be edited; schema measured from one corner
+- User answers, 2026-11-16: rectangle only; room size cannot be edited; schema measured from one corner; sizes for normal Indian homes (6 to 30 ft rooms, 10 ft walls)
 
 ## Open questions
-- What are the allowed ranges for width and length (minimum and maximum), and are fractions allowed (for example 0.25 ft steps)?
-- What message is shown for an empty, zero, negative or non-numeric value?
-- 3D needs a wall height. Should it be a fixed default, or entered here?
-- What grid spacing should the plan use? (Moves snap to 0.25 ft.)
+- None. (Grid: one dot every 2 ft, with moves snapping to 0.25 ft, as drawn in the mocks.)
