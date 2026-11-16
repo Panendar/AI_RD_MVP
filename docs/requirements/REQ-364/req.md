@@ -11,26 +11,28 @@ As a homeowner or interior designer, I can see the same design as a 3D room and 
 ## Behaviour
 - The 3D view is in **its own tab** next to the 2D plan tab (user decision, 2026-11-16).
 - It is built from the same room JSON:
-  - the floor and four walls, at the room width and length;
+  - the floor and four walls, at the room width and length, with walls **10 ft** high (fixed; normal Indian homes);
   - every item at its `position`, facing its `rotation`, at its `size` (width, depth and height in feet).
 - Everything is white in 3D, as in 2D. Colours cannot be edited (user decision, 2026-11-16).
 - The user can orbit, zoom and pan.
+- Every time the 3D tab is opened, the camera starts from the same **start view**. Reset view returns to it at any time (user decision, 2026-11-16).
 - It is a preview, not a photorealistic rendering (intent.md, Not goals).
 
 ## Acceptance criteria
 - Opening the 3D tab shows the room and every item from the room JSON, all in white.
 - Item positions, facings and footprints in 3D match the 2D plan, and item heights match their catalog heights.
 - The user can orbit, zoom and pan the 3D view.
+- The walls are 10 ft high.
+- Opening the 3D tab always shows the start view, even after the camera was moved on an earlier visit.
 - Switching back to the 2D tab shows the plan unchanged.
 
 ## Source documents
 - docs/project/source/features.md: #8 3D preview (REQ-317, REQ-318)
 - docs/project/room-plan-schema.md
 - docs/project/intent.md: G1; Not goals (photorealistic rendering)
-- User answers, 2026-11-16: 3D in its own tab; white only
+- User answers, 2026-11-16: 3D in its own tab; white only; 10 ft walls; camera starts from the start view each time
 
 ## Open questions
-- What wall height should the room have (not in the room JSON yet)?
 - How are items drawn in 3D: simple white boxes, or simple shapes per item (for example a sofa with a back and arms)?
-- Which mouse controls should be used, and is there a Reset view button?
+- Are the proposed mouse controls fine: drag to orbit, scroll to zoom, right-drag to pan? What exactly is the start view (for example, looking in from the bottom-left corner)?
 - How are the walls and the white items told apart in 3D (shading, outlines)?
