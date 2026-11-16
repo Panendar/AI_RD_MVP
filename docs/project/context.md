@@ -6,3 +6,4 @@ Intent status: validated 2026-11-16 f24f0008
 | Path | What | Status | Added by |
 |---|---|---|---|
 | docs/project/intent.md | Project intent | final | define-intent |
+| docs/project/source/ | Source documents | final | define-intent |
