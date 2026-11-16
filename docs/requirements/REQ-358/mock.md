@@ -9,12 +9,12 @@
 | | Start from scratch                             |  | PREVIEW (top view)                               |   |
 | |                                                |  |     0     4     8    12 ft                       |   |
 | | Shape      Rectangle                           |  |     +-----------------+                          |   |
-| | Width      [ 12.0 ] ft                         |  |     |                 |                          |   |
-| | Length     [ 10.0 ] ft                         |  |     |   12 x 10 ft    |                          |   |
-| |                                                |  |     |                 |                          |   |
-| | ! Width must be a number greater than 0.       |  |     +-----------------+                          |   |
-| |   (under the field; limits: open question)     |  |     (0,0) = top-left corner                      |   |
-| |                                                |  |                                                  |   |
+| | Width      [ 12.0 ] ft     (6 to 30 ft)        |  |     |                 |                          |   |
+| | Length     [ 10.0 ] ft     (6 to 30 ft)        |  |     |   12 x 10 ft    |                          |   |
+| | Walls      10 ft high (standard, fixed)        |  |     |                 |                          |   |
+| |                                                |  |     +-----------------+                          |   |
+| | ! Width must be between 6 and 30 ft.           |  |     (0,0) = top-left corner                      |   |
+| |   (shown under the field when out of range)    |  |                                                  |   |
 | | The room size cannot be changed later.         |  |                                                  |   |
 | |                           [ Create room ]      |  |                                                  |   |
 | +------------------------------------------------+  +--------------------------------------------------+   |
@@ -37,7 +37,7 @@
 | Item      W x D x H ft   |  10  +-----------------------------------+           |                          |
 +--------------------------+------------------------------------------------------+--------------------------+
 | Room JSON:  { schemaVersion: "1.0", units: "ft", origin: "top-left",                                       |
-|               room: { width: 12, length: 10, walls: [top, right, bottom, left] }, items: [ ] }  -> [OK]    |
+|               room: { width: 12, length: 10, height: 10, walls: [4] }, items: [ ] }  -> [OK]               |
 +------------------------------------------------------------------------------------------------------------+
 ```
 
@@ -51,7 +51,7 @@
 - Rectangle only, and room size not editable (user decisions, 2026-11-16).
 - All positions are measured from the top-left floor corner (0,0): x to the right, y down the plan.
 - The header shows the two tabs: [* 2D plan *] is active, [ 3D view ] opens the 3D tab (REQ-364).
-- Width 12 and length 10 are example values. The allowed range and the exact message wording are open questions.
+- Width and length: 6 to 30 ft in 0.25 ft steps; walls 10 ft high, fixed (normal Indian homes, user decision 2026-11-16). 12 x 10 is an example.
 - The room JSON lines are shown only to explain the data; they are not on screen.
 - Layout follows the reference editor (ai-room-redesign UI Mock 10 and 15).
 - Based on features.md #1, #2, #3.
