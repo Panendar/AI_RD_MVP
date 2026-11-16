@@ -1,45 +1,46 @@
-# UI Mock 6 — User can open a design from a JSON file and keep editing
+# UI Mock 7 — User can open a design from a JSON file and keep editing
 
 ```text
 +------------------------------------------------------------------------------------------------------------+
-| AI RD MVP   Room 12 x 10 ft                                            [ Upload JSON ]   [ Download JSON ] |
+| AI RD MVP   Room 12 x 10 ft (fixed)     [* 2D plan *]  [ 3D view ]     [ Upload JSON ]   [ Download JSON ] |
 +------------------------------------------------------------------------------------------------------------+
 |                                                                       ^ click, choose <design>.json        |
-| CHECKING <design>.json against the schema ...                                                              |
+| CHECKING <design>.json  ->  schema v1.0  ->  rules (walls, ids, inside walls, catalog sizes, 0.5 ft gaps)  |
 +------------------------------------------------------------------------------------------------------------+
 | A. FILE IS VALID  ->  the design opens exactly as it was downloaded                                        |
 +--------------------------+------------------------------------------------------+--------------------------+
-| CATALOG  (examples)      |      0     2     4     6     8    10    12 ft        | OPENED                   |
-| Search [ sofa_______ ]   |   0  +-----------------------------------+           | <design>.json            |
-|                          |      |                                   |           | Schema check: [OK]       |
-| Seating                  |   2  |  +--------------+     +---------+ |           | 3 items                  |
-|   Sofa (3 seat)          |      |  |     SOFA     |     |   BED   | |           |                          |
-|   Diwan                  |   4  |  +--------------+     |         | |           | Keep editing: move,      |
-| Beds                     |      |                       +---------+ |           | rotate, resize,          |
-|   Single bed             |   6  |                                   |           | delete, or add from      |
-| Storage                  |      |           +---------+             |           | the catalog.             |
-|                          |   8  |           |  TABLE  |             |           |                          |
-|                          |      |           +---------+             |           |                          |
+| CATALOG   (all white)    |      0     2     4     6     8    10    12 ft        | OPENED                   |
+| Search [ __________ ]    |   0  +-----------------------------------+           | <design>.json            |
+| Item      W x D x H ft   |      | +------------------+              |           | Schema check: [OK]       |
+| Bed       5.0x6.5x1.5    |   2  | |       SOFA       |              |           | Rules check:  [OK]       |
+| Sofa      6.5x3.0x2.75   |      | +------------------+              |           | 3 items                  |
+| Table     4.0x2.5x2.5    |   4  |                                   |           |                          |
+| Chair     1.5x1.5x3.0    |      |                                   |           | Keep editing: move,      |
+| TV        4.0x1.0x3.0    |   6  |    +-----------+     +--------+   |           | rotate, delete, or       |
+| Locker    3.0x1.75x6.5   |      |    |   TABLE   |     | LOCKER |   |           | add from the catalog.    |
+|                          |   8  |    +-----------+     |        |   |           |                          |
+|                          |      |                      +--------+   |           |                          |
 |                          |  10  +-----------------------------------+           |                          |
 +--------------------------+------------------------------------------------------+--------------------------+
 | B. FILE IS NOT VALID                                                                                       |
 | +----------------------------------------------------------+                                               |
 | | ! This file is not a valid room design.                  |   The design on screen is NOT replaced.       |
-| |   <reason, e.g. "furniture item 2 has no size">          |   Wording and detail: open question.          |
+| |   <reason, e.g. "item-2 (TV) is 0.25 ft from item-1;     |   Wording and detail: open question.          |
+| |    items must be at least 0.5 ft apart">                 |                                               |
 | |                                                          |                                               |
-| |                                               [ OK ]     |                                               |
+| |                                              [ OK ]      |                                               |
 | +----------------------------------------------------------+                                               |
 +------------------------------------------------------------------------------------------------------------+
 ```
 
 ### Main interactions
-- Upload JSON opens a file picker; the chosen file is checked against the schema.
-- A valid file replaces the current design and is drawn exactly as it was saved; editing and the catalog work as usual.
+- Upload JSON opens a file picker; the file is checked against the schema and the business rules.
+- A valid file replaces the current design and is drawn exactly as it was saved; the room size is fixed as in the file.
 - An invalid file is rejected with a clear message, and the current design stays on screen.
 - Downloading the opened design again gives a file with the same design.
 
 ### Screen notes
-- This is how a design is shared: the receiver uploads the file and keeps editing.
-- Open questions: a warning before replacing the current design, how detailed the error is, valid files with items outside the walls or unknown types, a file size limit.
+- Sharing = the receiver uploads the file and keeps editing.
+- Open questions: warning before replacing; error detail; files with gaps between 0.5 and 1.5 ft; size limit.
 - Reference: ai-room-redesign UI Mock 34.
-- Based on features.md #7 Upload JSON (REQ-315) and #1 Room plan JSON (REQ-290).
+- Based on features.md #7 Upload JSON and #1 Room plan JSON.
