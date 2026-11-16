@@ -9,7 +9,7 @@ Goals: G4, G3
 As a homeowner or interior designer, I can search a catalog of Indian furniture and add an item to the plan at its real size.
 
 ## Behaviour
-- The catalog has six items, each with a fixed width, depth and height in feet (sizes proposed in [room-plan-schema.md](../../project/room-plan-schema.md), to be confirmed):
+- The catalog has six items, each with a fixed width, depth and height in feet. These are standard sizes for normal Indian homes, decided by the user on 2026-11-16 (see [room-plan-schema.md](../../project/room-plan-schema.md)):
 
   | Item | W x D x H ft |
   |---|---|
@@ -21,25 +21,26 @@ As a homeowner or interior designer, I can search a catalog of Indian furniture 
   | Locker (steel almirah) | 3.0 x 1.75 x 6.5 |
 
 - Typing in the search box narrows the list by name.
-- Adding an item draws it in the 2D plan at its real size, facing 0° (its front toward the bottom wall), and adds it to `items` in the room JSON with `catalogId`, `name`, `position` (centre, ft from the top-left corner), `size`, `rotation` 0 and `colour` "#FFFFFF".
+- Items are added by **drag and drop only**, with no Add button (user decision, 2026-11-16). The user drags an item from the catalog onto the plan; while dragging, a white outline at real size follows the mouse and snaps to 0.25 ft.
+  - Dropped inside the room: the item is placed where it was dropped. If any part would cross a wall, it stops at the wall.
+  - Dropped outside the room: nothing is added.
+- A placed item is drawn in the 2D plan at its real size, facing 0° (its front toward the bottom wall). It is added to `items` in the room JSON with `catalogId`, `name`, `position` (centre, ft from the top-left corner), `size`, `rotation` 0 and `colour` "#FFFFFF".
 - Every item is white, in 2D and 3D. Colour **cannot be edited** (user decision, 2026-11-16).
 - An item's size cannot be changed (no resizing; user decision, 2026-11-16).
-- Placing a new item near others follows the clearance rule (REQ-366).
+- Dropping a new item near others follows the clearance rule (REQ-366): a red line while dragging, then a confirmation or a refusal on drop.
 
 ## Acceptance criteria
 - The catalog lists exactly the six items, each showing its width x depth x height in feet.
 - Typing in the catalog search narrows the list to matching items; text that matches nothing shows "no match" and leaves the plan unchanged.
-- Adding an item shows it in the 2D plan inside the room, white, with its footprint (width x depth) measuring its catalog size on the ruler.
+- Dragging an item from the catalog and dropping it inside the room places it where it was dropped: white, with its footprint (width x depth) measuring its catalog size on the ruler.
+- Dropping an item outside the room adds nothing; there is no Add button.
 - The added item appears in the room JSON with the fields above, and the JSON passes the schema check.
 
 ## Source documents
 - docs/project/source/features.md: #5 Add from catalog (REQ-285, REQ-298)
 - docs/project/room-plan-schema.md
 - docs/project/intent.md: G3, G4
-- User answers, 2026-11-16: catalog items; white only; no colour editing; no resizing
+- User answers, 2026-11-16: catalog items and sizes for normal Indian homes; white only; no colour editing; no resizing; add by drag and drop
 
 ## Open questions
-- Confirm the proposed sizes in the table above.
-- Where is a new item placed (centre of the room, the first free spot, or where the user drops it)? Can items be dragged in from the catalog?
-- What happens if a new item cannot fit anywhere with at least 0.5 ft clearance?
-- How is each item drawn in 2D (a labelled rectangle, or a simple top-view symbol)?
+- How is each item drawn in 2D: a labelled white rectangle, or a simple top-view symbol (bed with pillows, sofa with arms)?
