@@ -1,59 +1,60 @@
-# UI Mock 4 — User can rotate, resize and delete furniture
+# UI Mock 4 — User can rotate and delete furniture
 
 ```text
 +------------------------------------------------------------------------------------------------------------+
-| AI RD MVP   Room 12 x 10 ft                                            [ Upload JSON ]   [ Download JSON ] |
+| AI RD MVP   Room 12 x 10 ft (fixed)     [* 2D plan *]  [ 3D view ]     [ Upload JSON ]   [ Download JSON ] |
 +------------------------------------------------------------------------------------------------------------+
-| A. SELECTED ITEM: ROTATION RING AND FLOATING TOOLBAR                                                       |
+| A. SELECTED ITEM: ROTATION RING (drag the knob o with the mouse) AND FLOATING TOOLBAR                      |
 +--------------------------+------------------------------------------------------+--------------------------+
-| CATALOG  (examples)      |      0     2     4     6     8    10    12 ft        | SELECTED: Sofa           |
-| Search [ sofa_______ ]   |   0  +-----------------------------------+           | Size  W [ 6.0 ] ft       |
-|                          |      |       .--'''''  o  '''''--.       |           |       D [ 3.0 ] ft       |
-| Seating                  |   2  |   .'                         '.   |           | Rotation  [ 0 deg ]      |
-|   Sofa (3 seat)          |      |  /      #===============#      \  |           | Step      10 deg         |
-|   Diwan                  |   4  | |       #     SOFA      #       | |           |                          |
-| Beds                     |      | |       #               #       | |           | o = rotate knob on       |
-|   Single bed             |   6  |  \      #===============#      /  |           | the ring. Drag it,       |
-| Storage                  |      |   '.                         .'   |           | or press Rotate 10.      |
-|                          |   8  |      '--====[ 0 deg ]====--'      |           |                          |
-|                          |      |    [Rotate 10][Resize][Delete]    |           | [ Delete ]               |
-|                          |  10  +-----------------------------------+           |                          |
+| CATALOG   (all white)    |      0     2     4     6     8    10    12 ft        | SELECTED: Sofa           |
+| Search [ __________ ]    |   0  +-----------------------------------+           | W 6.5  D 3.0  H 2.75 ft  |
+| Item      W x D x H ft   |      |       .--'''''  o  '''''--.       |           | (size is fixed)          |
+| Bed       5.0x6.5x1.5    |   2  |   .'                         '.   |           | Rotation  0 deg          |
+| Sofa      6.5x3.0x2.75   |      |  /    #==================#     \  |           | Facing: bottom wall      |
+| Table     4.0x2.5x2.5    |   4  | |     #       SOFA       #      | |           | Step: 10 deg             |
+| Chair     1.5x1.5x3.0    |      | |     #                  #      | |           |                          |
+| TV        4.0x1.0x3.0    |   6  |  \    #==================#     /  |           | Drag the knob o around   |
+| Locker    3.0x1.75x6.5   |      |   '.                         .'   |           | the ring, or press       |
+|                          |   8  |      '--====[ 0 deg ]====--'      |           | Rotate 10.               |
+|                          |      |     [ Rotate 10 ]  [ Delete ]     |           |                          |
+|                          |  10  +-----------------------------------+           | [ Delete ]               |
 +--------------------------+------------------------------------------------------+--------------------------+
-| B. DRAG THE KNOB (OR PRESS ROTATE 10)  ->  SNAPS TO 10 deg    C. RESIZE WITH A CORNER HANDLE               |
-|   0  +-----------------------------------+    0  +-----------------------------------+                     |
-|      |       .--'''''  o  '''''--.       |       |         was 6 ft wide:            |                     |
-|   2  |   .'                         '.   |    2  |         . . . . . . . . .         |                     |
-|      |  /       +-----.___            \  |       |         #====================#    |                     |
-|   4  | |       /   SOFA   '''--+       | |    4  |         #     SOFA           #    |                     |
-|      | |      /                /       | |       |         #                    #    |                     |
-|   6  |  \     +--..___       /        /  |    6  |         #====================#[]  |                     |
-|      |   '.           '''---+       .'   |       |         now 7.0 x 3.0 ft          |                     |
-|   8  |     '--====[ 10 deg ]====--'      |    8  |         [] = corner handle        |                     |
-|      |                                   |       |                                   |                     |
-|  10  +-----------------------------------+   10  +-----------------------------------+                     |
-|                                                                                                            |
-| Each step: 0 -> 10 -> 20 -> ... -> 350 -> 0 deg. Panel and room JSON (rotation: 10) update at once.        |
+| B. AFTER ONE STEP: 10 deg  (knob dragged, or Rotate 10 pressed)                                            |
+|   0  +-----------------------------------+                                                                 |
+|      |       .--'''''  o  '''''--.       |   Steps: 0 -> 10 -> 20 -> ... -> 350 -> 0 deg                   |
+|   2  |   .'                         '.   |                                                                 |
+|      |  /     #======.___             \  |   Dragging the knob snaps to the nearest                        |
+|   4  | |     #   SOFA    '''==#        | |   10 deg; the bubble on the ring shows                          |
+|      | |    #                 #        | |   the angle while you drag.                                     |
+|   6  |  \   #==..___         #        /  |                                                                 |
+|      |   '.         '''=====#       .'   |   Panel:  Rotation 10 deg                                       |
+|   8  |     '--====[ 10 deg ]====--'      |   JSON:   items[0].rotation = 10                                |
+|      |                                   |                                                                 |
+|  10  +-----------------------------------+   Facing = direction of the item front,                         |
+|                                              clockwise; 0 = front faces bottom wall.                       |
 +------------------------------------------------------------------------------------------------------------+
-| D. DELETE                                       E. ROTATE OR RESIZE WOULD CROSS A WALL                     |
+| C. DELETE                                       D. ROTATION WOULD CROSS A WALL                             |
 | +----------------------------------------------+  +------------------------------------------------------+ |
-| | [ Delete ] on the toolbar or in the panel    |  | The change is not applied: the item keeps its last   | |
-| | -> the sofa disappears from the plan         |  | rotation / size inside the room.                     | |
-| | -> it is removed from the room JSON          |  | Example: sofa against the right wall, Rotate 10      | |
+| | [ Delete ] on the toolbar or in the panel    |  | The rotation is not applied: the item keeps its      | |
+| | -> the sofa disappears from the plan         |  | last angle.                                          | |
+| | -> it is removed from items[ ] in the JSON   |  | Example: sofa against the right wall, Rotate 10      | |
 | | (confirm first? undo? : open questions)      |  | -> a corner would cross the wall -> stays at 0 deg.  | |
 | +----------------------------------------------+  +------------------------------------------------------+ |
+|                                                                                                            |
+| NO RESIZING: item sizes come from the catalog and cannot be changed.                                       |
 +------------------------------------------------------------------------------------------------------------+
 ```
 
 ### Main interactions
-- Selecting an item shows a rotation ring around it with a knob (o), the current angle in a bubble on the ring, corner handles for resize and a floating toolbar above the item.
-- Rotation moves in 10 deg steps: dragging the knob snaps to the nearest 10 deg, and Rotate 10 turns the item 10 deg clockwise. The angle shows in the bubble and in the right panel.
-- Dragging a corner handle (or typing W and D in the panel) resizes the item in feet.
+- Selecting an item shows a rotation ring around it, with a knob (o), the angle in a bubble on the ring, and a floating toolbar.
+- Rotate with the mouse by dragging the knob; the item turns around its centre in 10 deg steps. Rotate 10 turns it 10 deg clockwise.
+- The angle (facing) shows on the ring and in the panel, and is saved as rotation in the room JSON straight away.
 - Delete removes the item from the plan and the room JSON.
-- Every change shows in the plan and in the room JSON straight away; a rotate or resize that would cross a wall is not applied.
+- A rotation that would cross a wall is not applied; one closer than 1.5 ft to another item follows the clearance rule (REQ-366).
 
 ### Screen notes
-- Rotation step 10 deg (user decision, 2026-11-16).
+- 10 deg rotation step with the mouse; no resizing (user decisions, 2026-11-16).
 - ASCII cannot draw a true 10 deg tilt; the tilted sofa in B is approximate.
-- Open questions: free rotation (no snap) with a modifier key, typing an exact angle, keeping proportions on resize, minimum/maximum size, delete confirmation and undo, colour editing.
-- Reference: docs/references/rotation.png (rotation ring with live angle) and designs_matress.png (floating toolbar over the selected item); ai-room-redesign UI Mock 16 and 18.
-- Based on features.md #4 Edit the 2D plan (REQ-297, REQ-299).
+- Open questions: delete confirmation and undo; typing an exact angle.
+- Reference: docs/references/rotation.png (rotation ring with live angle) and designs_matress.png (floating toolbar); ai-room-redesign UI Mock 16 and 18.
+- Based on features.md #4 Edit the 2D plan.
