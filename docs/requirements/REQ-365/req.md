@@ -11,6 +11,7 @@ As a homeowner or interior designer, I see every edit I make in the 2D plan show
 ## Behaviour
 - The 3D view is in its own tab. Every change to the room JSON (add, move, rotate, delete, opening a file) is in the 3D tab the next time the user opens it, with no refresh or extra action.
 - Switching between the 2D and 3D tabs any number of times always shows the same design.
+- Each time the 3D tab opens, the camera is back at the start view (user decision, 2026-11-16; see REQ-364).
 
 ## Acceptance criteria
 - After adding, moving, rotating or deleting an item in 2D, opening the 3D tab shows the same change.
@@ -20,8 +21,7 @@ As a homeowner or interior designer, I see every edit I make in the 2D plan show
 ## Source documents
 - docs/project/source/features.md: #8 3D preview (REQ-317, REQ-318)
 - docs/project/intent.md: G1; Success: "After any edit, the 2D plan and the 3D view show the same design with no manual steps"
-- User answers, 2026-11-16: 3D in its own tab
+- User answers, 2026-11-16: 3D in its own tab; camera back to the start view each time
 
 ## Open questions
-- Does the 3D camera keep its position between visits to the tab, or reset each time?
 - Is the 3D tab view-only, or can items be selected there?
