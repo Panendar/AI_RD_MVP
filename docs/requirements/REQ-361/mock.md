@@ -35,11 +35,13 @@
 +------------------------------------------------------------------------------------------------------------+
 | C. DELETE                                       D. ROTATION WOULD CROSS A WALL                             |
 | +----------------------------------------------+  +------------------------------------------------------+ |
-| | [ Delete ] on the toolbar or in the panel    |  | The rotation is not applied: the item keeps its      | |
-| | -> the sofa disappears from the plan         |  | last angle.                                          | |
-| | -> it is removed from items[ ] in the JSON   |  | Example: sofa against the right wall, Rotate 10      | |
-| | (confirm first? undo? : open questions)      |  | -> a corner would cross the wall -> stays at 0 deg.  | |
-| +----------------------------------------------+  +------------------------------------------------------+ |
+| | [ Delete ]  ->  confirmation popup:          |  | The rotation is not applied: the item keeps its      | |
+| | +-------------------------------------+      |  | last angle.                                          | |
+| | | Delete Sofa?  [ Delete ] [ Cancel ] |      |  | Example: sofa against the right wall, Rotate 10      | |
+| | +-------------------------------------+      |  | -> a corner would cross the wall -> stays at 0 deg.  | |
+| | Delete -> removed from plan and items[ ]     |  +------------------------------------------------------+ |
+| | Cancel -> nothing changes                    |                                                           |
+| +----------------------------------------------+                                                           |
 |                                                                                                            |
 | NO RESIZING: item sizes come from the catalog and cannot be changed.                                       |
 +------------------------------------------------------------------------------------------------------------+
@@ -49,12 +51,12 @@
 - Selecting an item shows a rotation ring around it, with a knob (o), the angle in a bubble on the ring, and a floating toolbar.
 - Rotate with the mouse by dragging the knob; the item turns around its centre in 10 deg steps. Rotate 10 turns it 10 deg clockwise.
 - The angle (facing) shows on the ring and in the panel, and is saved as rotation in the room JSON straight away.
-- Delete removes the item from the plan and the room JSON.
+- Delete asks for confirmation first; Delete removes the item from the plan and the room JSON, Cancel changes nothing.
 - A rotation that would cross a wall is not applied; one closer than 1.5 ft to another item follows the clearance rule (REQ-366).
 
 ### Screen notes
 - 10 deg rotation step with the mouse; no resizing (user decisions, 2026-11-16).
 - ASCII cannot draw a true 10 deg tilt; the tilted sofa in B is approximate.
-- Open questions: delete confirmation and undo; typing an exact angle.
+- Delete asks for confirmation (user decision, 2026-11-16). Open questions: undo; typing an exact angle.
 - Reference: docs/references/rotation.png (rotation ring with live angle) and designs_matress.png (floating toolbar); ai-room-redesign UI Mock 16 and 18.
 - Based on features.md #4 Edit the 2D plan.
