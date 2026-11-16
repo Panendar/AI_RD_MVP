@@ -2,35 +2,35 @@
 
 ```text
 +------------------------------------------------------------------------------------------------------------+
-| AI RD MVP   Room 12 x 10 ft                                            [ Upload JSON ]   [ Download JSON ] |
+| AI RD MVP   Room 12 x 10 ft (fixed)     [* 2D plan *]  [ 3D view ]     [ Upload JSON ]   [ Download JSON ] |
 +------------------------------------------------------------------------------------------------------------+
-+--------------------------+------------------------------------------------------+--------------------------+
-| CATALOG  (examples)      |      0     2     4     6     8    10    12 ft        | ITEM PREVIEW             |
-| Search [ sofa_______ ]   |   0  +-----------------------------------+           | [ sofa symbol ]          |
-|                          |      |                                   |           | Sofa (3 seat)            |
-| Seating                  |   2  |                                   |           | Size  6.0 x 3.0 ft       |
-| > Sofa (3 seat)   [+]    |      |        #=================#        |           | Colour  (default)        |
-|   Diwan            [+]   |   4  |        #      NEW SOFA   #        |           |                          |
-|                          |      |        #                 #        |           | [ Add to room ]          |
-| 1 of 5 items match       |   6  |        #=================#        |           |                          |
-|                          |      |       <- added at real size       |           | The new item is          |
-| Click [+] to add, or     |   8  |                                   |           | selected right away.     |
-| drag onto the room.      |      |                                   |           |                          |
+| CATALOG   (all white)    |      0     2     4     6     8    10    12 ft        | ITEM PREVIEW             |
+| Search [ so_______ ]     |   0  +-----------------------------------+           | [ sofa symbol ]          |
+| Item      W x D x H ft   |      |                                   |           | Sofa (3 seat)            |
+| > Sofa    6.5x3.0x2.75   |   2  |                                   |           | W 6.5  D 3.0  H 2.75 ft  |
+|   [ + Add to room ]      |      |        #===================#      |           | Colour: white (fixed)    |
+|                          |   4  |        #     NEW SOFA      #      |           | Size: fixed              |
+| 1 of 6 items match       |      |        #                   #      |           | Facing: 0 deg            |
+|                          |   6  |        #===================#      |           | (front -> bottom wall)   |
+| Full list: Bed, Sofa,    |      |       ^ added at real size        |           |                          |
+| Table, Chair, TV,        |   8  |        6.5 x 3.0 ft, white        |           | The new item is          |
+| Locker                   |      |                                   |           | selected right away.     |
 |                          |  10  +-----------------------------------+           |                          |
 +--------------------------+------------------------------------------------------+--------------------------+
 | NO MATCH:   Search [ xyz ]   ->   "No furniture matches 'xyz'."   The plan does not change.                |
-| ROOM JSON:  furniture: [ { type: "sofa-3-seat", position: { x: 3, y: 3 }, rotation: 0,                     |
-|                            size: { w: 6, d: 3 }, colour: "<default>" } ]                                   |
+| JSON:  items: [ { id: "item-1", catalogId: "sofa", name: "Sofa (3 seat)", position: { x: 6.25, y: 4.5 },   |
+|                  size: { width: 6.5, depth: 3.0, height: 2.75 }, rotation: 0, colour: "#FFFFFF" } ]        |
 +------------------------------------------------------------------------------------------------------------+
 ```
 
 ### Main interactions
-- Search by name narrows the list; categories group the items.
-- Click [+] (or Add to room) to place the item in the room at its real size in feet; it is added to the room JSON and selected straight away.
-- The item drawn in the plan measures its catalog size on the ruler (6 x 3 ft sofa = 6 x 3 ft on the ruler).
+- The catalog lists six items with their width x depth x height in feet; search by name narrows the list.
+- Add to room places the item at its real size, facing 0 deg (front toward the bottom wall), white; it is added to the room JSON and selected straight away.
+- The item footprint measures its catalog width and depth on the ruler.
 
 ### Screen notes
-- Item names, categories and the 6 x 3 ft size are examples only; the real catalog list, sizes and colours are an open question.
-- Drag-to-place and where a clicked item lands (centre of the room?) are open questions.
-- Reference: ai-room-redesign UI Mock 17 and docs/references/block_identification.png (left catalog panel with furniture symbols).
-- Based on features.md #5 Add from catalog (REQ-285, REQ-298).
+- Catalog items: bed, sofa, table, chair, TV, locker (user decision, 2026-11-16). Sizes are proposed and must be confirmed (room-plan-schema.md).
+- Everything is white; there is no colour or size editing.
+- Where a new item is placed and drag-from-catalog are open questions; a close placement follows the clearance rule (REQ-366).
+- Reference: ai-room-redesign UI Mock 17; docs/references/block_identification.png.
+- Based on features.md #5 Add from catalog.
