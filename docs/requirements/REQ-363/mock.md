@@ -15,12 +15,12 @@
 | Bed       5.0x6.5x1.5    |   2  | |       SOFA       |              |           | Rules check:  [OK]       |
 | Sofa      6.5x3.0x2.75   |      | +------------------+              |           | 3 items                  |
 | Table     4.0x2.5x2.5    |   4  |                                   |           |                          |
-| Chair     1.5x1.5x3.0    |      |                                   |           | Keep editing: move,      |
-| TV        4.0x1.0x3.0    |   6  |    +-----------+     +--------+   |           | rotate, delete, or       |
-| Locker    3.0x1.75x6.5   |      |    |   TABLE   |     | LOCKER |   |           | add from the catalog.    |
-|                          |   8  |    +-----------+     |        |   |           |                          |
-|                          |      |                      +--------+   |           |                          |
-|                          |  10  +-----------------------------------+           |                          |
+| Chair     1.5x1.5x3.0    |      |                                   |           | Shown exactly as saved:  |
+| TV        4.0x1.0x3.0    |   6  |    +-----------+     +--------+   |           | no red lines, no popups. |
+| Locker    3.0x1.75x6.5   |      |    |   TABLE   |     | LOCKER |   |           |                          |
+|                          |   8  |    +-----------+     |        |   |           | Keep editing: move,      |
+|                          |      |                      +--------+   |           | rotate, delete, or       |
+|                          |  10  +-----------------------------------+           | drag from the catalog.   |
 +--------------------------+------------------------------------------------------+--------------------------+
 | B. FILE IS NOT VALID                                                                                       |
 | +----------------------------------------------------------+                                               |
@@ -41,6 +41,7 @@
 
 ### Screen notes
 - Sharing = the receiver uploads the file and keeps editing.
-- Open questions: warning before replacing; error detail; files with gaps between 0.5 and 1.5 ft; size limit.
+- Opens exactly as saved and shared, with no red lines (user decision, 2026-11-16).
+- Open questions: warning before replacing; error detail; size limit.
 - Reference: ai-room-redesign UI Mock 34.
 - Based on features.md #7 Upload JSON and #1 Room plan JSON.
