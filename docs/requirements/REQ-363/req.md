@@ -16,7 +16,7 @@ As a homeowner or interior designer, I can upload a .json design file to open it
   - every item is inside the walls;
   - every size matches the catalog;
   - no two items are less than 0.5 ft apart.
-- A valid file replaces the current design. The 2D plan is drawn from it, and the room size is fixed as in the file.
+- A valid file replaces the current design. The 2D plan shows **exactly what was saved and shared**, with no red lines or popups even for items 0.5 to 1.5 ft apart (user decision, 2026-11-16). The room size is fixed as in the file.
 - An invalid file is rejected with a clear message, and the current design stays as it was.
 - After opening, move, rotate, delete and add from the catalog all work on the opened design.
 
@@ -34,5 +34,4 @@ As a homeowner or interior designer, I can upload a .json design file to open it
 ## Open questions
 - If a design is already open, is the user warned before it is replaced?
 - What does the error message say: one general message, or the exact field or rule that failed?
-- If a file has items 0.5 to 1.5 ft apart, does it open with the red lines shown, or ask first? (See REQ-366.)
 - Is there a maximum file size?
