@@ -28,12 +28,14 @@
 | |                                                      |  | The room JSON does not change.               | |
 | |               [ Place here ]     [ Cancel ]          |  |                                              | |
 | |                                                      |  |                           [ OK ]             | |
-| | Place here -> stays, saved to the room JSON          |  |                                              | |
+| | Place here -> stays, saved; the red line goes away   |  |                                              | |
 | | Cancel     -> back to where it was                   |  |                                              | |
 | |               (removed, if it was just added)        |  |                                              | |
 | +------------------------------------------------------+  +----------------------------------------------+ |
 |                                                                                                            |
 | D. GAP 1.5 ft OR MORE  ->  placed normally: no red line, no popup.                                         |
+| E. AFTER PLACE HERE  ->  no red line for that pair, until an item is dragged or rotated close again.       |
+| F. DESIGN OPENED FROM A FILE  ->  shown exactly as saved: no red lines, no popups.                         |
 | The same rule runs after ADD from the catalog, MOVE and ROTATE. Gaps to walls are not checked here.        |
 +------------------------------------------------------------------------------------------------------------+
 ```
@@ -47,6 +49,6 @@
 ### Screen notes
 - Recommended 1.5 ft, minimum 0.5 ft (user decision, 2026-11-16).
 - The gap is the shortest edge-to-edge distance between the rotated footprints, shown with 2 decimals.
-- Open questions: does the red line stay visible after a confirmed close placement; how uploaded files with close items open; any gap to walls.
+- After Place here the red line disappears; opened files show no red lines (user decisions, 2026-11-16). Items may stand against walls.
 - Reference: ai-room-redesign UI Mock 28 (red warnings for overlaps); docs/references/distance_measure.png.
 - New requirement from the user answers, 2026-11-16.
