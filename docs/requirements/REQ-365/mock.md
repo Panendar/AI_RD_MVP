@@ -16,7 +16,7 @@
 | +--------------------------------------+               +--------------------------------------+            |
 |    room JSON updated at once:  items[0].position.x  3.75 -> 6.75                                           |
 |                                                                                                            |
-| 2. CLICK THE [ 3D view ] TAB  ->  the sofa is already in its new place (no refresh, no extra click)        |
+| 2. CLICK THE [ 3D view ] TAB  ->  sofa already in its new place; camera at the start view (no refresh)     |
 | +------------------------------------------------------------------------+                                 |
 | | 3D VIEW  (everything white)                             [ Reset view ] |                                 |
 | |         +--------------------------------------------------+           |                                 |
@@ -43,5 +43,5 @@
 
 ### Screen notes
 - 3D in its own tab (user decision, 2026-11-16).
-- Open questions: does the 3D camera keep its position between visits; is the 3D tab view-only.
+- The camera returns to the start view on every visit (user decision, 2026-11-16). Open question: is the 3D tab view-only.
 - Based on features.md #8 3D preview.
