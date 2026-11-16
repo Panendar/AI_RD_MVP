@@ -10,11 +10,14 @@ As a homeowner or interior designer, I can rotate, resize and delete a selected 
 
 ## Behaviour
 - With an item selected, the user can rotate it, resize it or delete it.
+- The selected item shows a rotation ring around it with a knob and the current angle.
+- Rotation moves in steps of 10°: dragging the knob snaps to the nearest 10°, and a Rotate button turns the item 10° (decided by the user on 2026-11-16).
 - The item stays inside the room walls after a rotate or resize.
 - Each edit updates the room JSON straight away (rotation, size, or removal of the item).
 
 ## Acceptance criteria
 - Rotating a selected item changes its rotation in the plan and in the room JSON straight away.
+- Each rotate step turns the item by 10° (0, 10, 20 ... 350), and the current angle is shown on the ring.
 - Resizing a selected item changes its size in the plan and in the room JSON straight away.
 - A rotate or resize that would take the item outside the walls is not applied.
 - Deleting a selected item removes it from the plan and from the room JSON.
@@ -24,7 +27,7 @@ As a homeowner or interior designer, I can rotate, resize and delete a selected 
 - docs/project/intent.md: G1
 
 ## Open questions
-- Is rotation free, or in steps (for example 90° or 15°)?
+- Besides the 10° steps, is free rotation (no snap) or typing an exact angle also allowed?
 - Is resizing done with handles, by typing a size in feet, or both? Is there a minimum or maximum size?
 - Does resizing keep the item's proportions?
 - Is a delete confirmed first? Is there undo?
