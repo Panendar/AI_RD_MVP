@@ -19,7 +19,7 @@ Everything runs in the browser, on top of WI-033 (room model, `useRoomStore`, `c
    - Rule 2 `uniqueItemIds`.
    - Rule 3 `itemsInsideWalls`: footprint after rotation lies inside the walls (rotation-aware bounding box from the four corners, so it already serves REQ-360/361).
    - Rule 4 `sizeMatchesCatalog`.
-   - Rule 5 (0.5 ft hard minimum, 0.5–1.5 ft confirm) belongs to REQ-366 and is not added here.
+   - Rule 5 (no overlap; gaps under 1.5 ft, touching included, need a confirm) belongs to REQ-366 and is not added here.
 4. **Store** – `useRoomStore` gains `addItem(catalogId, dropPoint): { ok: boolean; errors: string[] }`. It looks up the catalog entry, calls `placeInRoom`, builds the item `{ id, catalogId, name, position, size, rotation: 0, colour: "#FFFFFF" }`, appends it to a copy of the plan, runs `checkRoomPlan` and sets the plan only if it passes. Dropped outside or not fitting: no change. The store keeps a hook point (`beforeAdd`) where REQ-366 will insert the clearance confirm/refuse step.
 5. **Catalog panel** – `src/features/editor/CatalogPanel.tsx`, replacing the ROOM/VIEW text in the left aside (that text moves below the catalog, unchanged):
    - Heading "CATALOG (all white)", a search input (`aria-label="Search catalog"`), and the list: name plus "W x D x H ft" for each matching entry, and "<n> of 6 items match" while a query is typed.
@@ -58,7 +58,7 @@ Everything runs in the browser, on top of WI-033 (room model, `useRoomStore`, `c
 
 ## Assumptions
 - Web only; no API change (the room is in memory, as in WI-033).
-- REQ-366 clearance (red line while dragging, confirm/refuse on drop, 0.5 ft minimum) is its own work item; this item leaves the `beforeAdd` hook for it and does not block close drops.
+- REQ-366 clearance (red line while dragging, confirm on a gap under 1.5 ft including touching, refuse on overlap) is its own work item; this item leaves the `beforeAdd` hook for it and does not block close drops.
 - If an item cannot fit in the room at rotation 0 (only the bed, 6.5 ft deep, in a room whose length is under 6.5 ft), the drop adds nothing, like a drop outside the room, and the drag outline is not shown. No message is shown (REQ-359 does not ask for one); a message can be added by its own requirement.
 - New items always face 0° (front toward the bottom wall); rotation is REQ-361.
 - Selecting, moving and deleting items are REQ-360/361; the right "Selected item" panel stays as it is.

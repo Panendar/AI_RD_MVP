@@ -8,6 +8,7 @@ import {
   Box, Button, Flex, Heading, Text
 } from '@chakra-ui/react';
 import { facingLabel, ROTATION_STEP_DEG } from '../../room/rotation';
+import { measureAll, formatGap, RECOMMENDED_GAP_FT } from '../../room/clearance';
 import { useRoomStore } from '../../state/roomStore';
 import { GRID_FT, PlanView } from './PlanView';
 import { CatalogPanel } from './CatalogPanel';
@@ -22,11 +23,18 @@ export function EditorPage() {
   const deleteItem = useRoomStore((s) => s.deleteItem);
   const selectedId = useDragState((s) => s.selectedItemId);
   const selectItem = useDragState((s) => s.selectItem);
+  const pending = useRoomStore((s) => s.pending);
+  const notice = useRoomStore((s) => s.notice);
+  const { beginChange, settleChange, confirmPending, cancelPending, dismissNotice } = useRoomStore.getState();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const placeCancelRef = useRef<HTMLButtonElement>(null);
+  const okRef = useRef<HTMLButtonElement>(null);
   if (!plan) return <Navigate to="/" replace />;
   const { width, length } = plan.room;
   const selected = plan.items.find((it) => it.id === selectedId);
+  const nearest = selected ? measureAll(plan.items, selected)[0] : undefined;
+  const touching = pending !== null && pending.gap === 0;
 
   return (
     <Flex direction="column" h="100vh">
@@ -69,9 +77,15 @@ export function EditorPage() {
               <Text>Rotation  {selected.rotation} deg</Text>
               <Text>Facing: {facingLabel(selected.rotation)}</Text>
               <Text>Step: {ROTATION_STEP_DEG} deg</Text>
+              <Heading as="h3" size="xs" mt={2}>GAP{nearest ? ` TO ${nearest.other.name.toUpperCase()}` : ''}</Heading>
+              <Text data-testid="selected-gap" color={nearest && nearest.gap < RECOMMENDED_GAP_FT ? 'red.500' : undefined}>
+                {nearest ? formatGap(nearest.gap) : 'no other item'}
+              </Text>
+              <Text>Recommended {RECOMMENDED_GAP_FT} ft</Text>
+              <Text>Minimum none (touching is allowed, overlap is not)</Text>
               <Text mt={2} color="gray.600">Drag to move. Moves snap to 0.25 ft. Drag the knob around the ring, or press Rotate 10.</Text>
               <Flex mt={3} gap={2}>
-                <Button size="sm" onClick={() => rotateItemStep(selected.id)}>Rotate 10</Button>
+                <Button size="sm" onClick={() => { beginChange(selected.id); rotateItemStep(selected.id); settleChange(selected.id); }}>Rotate 10</Button>
                 <Button size="sm" colorScheme="red" variant="outline" onClick={() => setConfirmDelete(true)}>Delete</Button>
               </Flex>
             </Box>
@@ -83,6 +97,36 @@ export function EditorPage() {
           )}
         </Box>
       </Flex>
+
+      <AlertDialog isOpen={pending !== null} leastDestructiveRef={placeCancelRef} onClose={cancelPending} isCentered>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>Too close</AlertDialogHeader>
+            <AlertDialogBody>
+              {pending && (touching
+                ? `This is touching the ${pending.otherName}. Gap ${formatGap(pending.gap)}. `
+                : `This is ${formatGap(pending.gap)} from the ${pending.otherName}. `)}
+              We recommend at least {RECOMMENDED_GAP_FT} ft. Place it here?
+            </AlertDialogBody>
+            <AlertDialogFooter gap={2}>
+              <Button ref={placeCancelRef} onClick={cancelPending}>Cancel</Button>
+              <Button colorScheme="blue" onClick={confirmPending}>Place here</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
+      <AlertDialog isOpen={notice !== null} leastDestructiveRef={okRef} onClose={dismissNotice} isCentered>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>Not allowed</AlertDialogHeader>
+            <AlertDialogBody>{notice} The item went back to where it was.</AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={okRef} onClick={dismissNotice}>OK</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
 
       <AlertDialog isOpen={confirmDelete && !!selected} leastDestructiveRef={cancelRef} onClose={() => setConfirmDelete(false)} isCentered>
         <AlertDialogOverlay>

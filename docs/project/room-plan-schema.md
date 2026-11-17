@@ -154,6 +154,6 @@ A file can pass the schema and still be invalid. These are checked on create, on
 2. Item `id`s are unique.
 3. Every item's footprint, after rotation, lies inside the walls.
 4. Every item's `size` matches its catalog entry.
-5. No two items are less than **0.5 ft** apart (measured edge to edge between the rotated footprints). Gaps from 0.5 ft up to 1.5 ft are allowed only after the user confirms them in the editor (REQ-366).
+5. No two items overlap (measured between the rotated footprints). Items may touch, and a gap or overlap under **0.01 ft** counts as touching (user decision, 2026-11-17). Gaps under 1.5 ft, touching included, are allowed only after the user confirms them in the editor (REQ-366).
 
 An uploaded file that passes these checks opens exactly as it was saved and shared, with no red lines and no popups. Close placements in it were already confirmed by whoever made it.

@@ -7,6 +7,7 @@ import { checkRoomPlan } from '../room/checkRoomPlan';
 import { getCatalogEntry } from '../room/catalog';
 import { clampCentre, nextItemId, placeInRoom } from '../room/placement';
 import { snapAngle } from '../room/rotation';
+import { findClearanceIssues } from '../room/clearance';
 
 export interface ChangeResult { ok: boolean; errors: string[] }
 
@@ -22,8 +23,25 @@ export const beforeMoveItem: MoveItemGuard[] = [];
 export type RotateItemGuard = (plan: RoomPlan, item: Item, rotation: number) => boolean;
 export const beforeRotateItem: RotateItemGuard[] = [];
 
+export const OVERLAP_MESSAGE = 'Items cannot overlap.';
+
+// A change waiting for the user's answer (REQ-366): the item is already in the plan at its new place; Cancel puts it back to
+// `origin` (or removes it, when `origin` is null because it was just added).
+export interface PendingClearance { itemId: string; origin: Item | null; otherName: string; gap: number }
+
 export interface RoomState {
   plan: RoomPlan | null;
+  // Clearance (REQ-366), editor state only, never part of the room JSON.
+  gesture: { itemId: string; origin: Item | null } | null;   // a drag / rotate in progress: where the item started
+  pending: PendingClearance | null;
+  notice: string | null;                                       // a refusal message ("Items cannot overlap.")
+  // Marks the start of a drag or a rotate so the result can be checked (and undone) when it ends.
+  beginChange(itemId: string): void;
+  // Ends a drag or rotate: overlap puts the item back and sets the notice; a gap under 1.5 ft (touching included) sets `pending`.
+  settleChange(itemId: string): void;
+  confirmPending(): void;   // Place here
+  cancelPending(): void;    // Cancel
+  dismissNotice(): void;
   // Builds the plan for width x length, checks it and keeps it only if it passes. Returns the check errors (empty on success).
   createRoom(width: number, length: number): string[];
   // Adds a catalog item dropped at `drop` (ft): snapped to 0.25 ft, stopped at the walls, facing 0 deg, white.
@@ -40,8 +58,54 @@ export interface RoomState {
   deleteItem(itemId: string): ChangeResult;
 }
 
+// Puts an item back to `origin`, or removes it when there is none.
+function restore(itemId: string, origin: Item | null): void {
+  const plan = useRoomStore.getState().plan;
+  if (!plan) return;
+  const items = origin
+    ? plan.items.map((it) => (it.id === itemId ? origin : it))
+    : plan.items.filter((it) => it.id !== itemId);
+  useRoomStore.setState({ plan: { ...plan, items } });
+}
+
+// Checks the item against the others once its drag, rotate or add is finished (REQ-366).
+function settle(itemId: string, origin: Item | null): void {
+  const plan = useRoomStore.getState().plan;
+  const item = plan?.items.find((it) => it.id === itemId);
+  useRoomStore.setState({ gesture: null });
+  if (!plan || !item) return;
+  if (origin && origin.position.x === item.position.x && origin.position.y === item.position.y && origin.rotation === item.rotation) return;
+  const issues = findClearanceIssues(plan.items, item);
+  if (issues.some((i) => i.kind === 'overlap')) {
+    restore(itemId, origin);
+    useRoomStore.setState({ notice: OVERLAP_MESSAGE });
+  } else if (issues.length > 0) {
+    useRoomStore.setState({ pending: { itemId, origin, otherName: issues[0].other.name, gap: issues[0].gap } });
+  }
+}
+
 export const useRoomStore = createAppStore<RoomState>({
   plan: null,
+  gesture: null,
+  pending: null,
+  notice: null,
+  beginChange(itemId) {
+    const { plan, pending } = useRoomStore.getState();
+    const item = plan?.items.find((it) => it.id === itemId);
+    if (!item || pending) return;
+    useRoomStore.setState({ gesture: { itemId, origin: item } });
+  },
+  settleChange(itemId) {
+    const g = useRoomStore.getState().gesture;
+    if (g && g.itemId === itemId) settle(itemId, g.origin);
+  },
+  confirmPending() { useRoomStore.setState({ pending: null }); },
+  cancelPending() {
+    const p = useRoomStore.getState().pending;
+    if (p) restore(p.itemId, p.origin);
+    useRoomStore.setState({ pending: null });
+  },
+  dismissNotice() { useRoomStore.setState({ notice: null }); },
   createRoom(width, length) {
     const plan = createRoomPlan(width, length);
     const result = checkRoomPlan(plan);
@@ -67,7 +131,10 @@ export const useRoomStore = createAppStore<RoomState>({
     if (!beforeAddItem.every((guard) => guard(plan, item))) return { ok: false, errors: [] };
     const next: RoomPlan = { ...plan, items: [...plan.items, item] };
     const result = checkRoomPlan(next);
-    if (result.ok) useRoomStore.setState({ plan: next });
+    if (result.ok) {
+      useRoomStore.setState({ plan: next });
+      settle(item.id, null);   // clearance: an overlap removes it again, a close one asks first
+    }
     return result;
   },
   moveItem(itemId, to) {

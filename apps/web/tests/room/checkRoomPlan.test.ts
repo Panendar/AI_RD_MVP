@@ -93,6 +93,6 @@ describe('room store', () => {
 
   it('offers no action that changes the room size', () => {
     const actions = Object.entries(useRoomStore.getState()).filter(([, v]) => typeof v === 'function').map(([k]) => k).sort();
-    expect(actions).toEqual(['addItem', 'createRoom', 'deleteItem', 'moveItem', 'reset', 'rotateItem', 'rotateItemStep']);
+    expect(actions).toEqual(['addItem', 'beginChange', 'cancelPending', 'confirmPending', 'createRoom', 'deleteItem', 'dismissNotice', 'moveItem', 'reset', 'rotateItem', 'rotateItemStep', 'settleChange']);
   });
 });

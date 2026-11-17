@@ -97,3 +97,60 @@ describe('rotate and delete (REQ-361)', () => {
     expect(screen.getByTestId('selected-item').textContent).toContain('(size is fixed)');
   });
 });
+
+describe('clearance in the editor (REQ-366)', () => {
+  const setup = () => {
+    useRoomStore.getState().createRoom(12, 10);
+    useRoomStore.getState().addItem('chair', { x: 2, y: 5 });
+    useRoomStore.getState().addItem('chair', { x: 9, y: 5 });
+    renderApp(<Routes><Route path="/editor" element={<EditorPage />} /></Routes>, { route: '/editor' });
+  };
+  const dragSecondTo = (x: number) => {
+    const second = screen.getAllByTestId('plan-item')[1];
+    mockPoint.mockReturnValue({ x: 9, y: 5 });
+    fireEvent.pointerDown(second);
+    mockPoint.mockReturnValue({ x, y: 5 });
+    fireEvent.pointerMove(screen.getByTestId('plan-view'));
+  };
+
+  it('shows a red line with the gap while dragging, and a popup on drop; Place here removes the line', () => {
+    setup();
+    dragSecondTo(4.5);                                       // chairs 1.5 wide: gap 4.5-0.75 - 2.75 = 1.00
+    expect(screen.getByTestId('clearance-line').textContent).toBe('1.00 ft');
+    fireEvent.pointerUp(screen.getByTestId('plan-view'));
+    expect(screen.getByText(/This is 1\.00 ft from the Chair/)).toBeTruthy();
+    expect(screen.getByTestId('clearance-line')).toBeTruthy();
+    fireEvent.click(screen.getByText('Place here'));
+    expect(screen.queryByTestId('clearance-line')).toBeNull();
+    expect(useRoomStore.getState().plan!.items[1].position.x).toBe(4.5);
+  });
+
+  it('Cancel puts the item back', () => {
+    setup();
+    dragSecondTo(4.5);
+    fireEvent.pointerUp(screen.getByTestId('plan-view'));
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(useRoomStore.getState().plan!.items[1].position.x).toBe(9);
+  });
+
+  it('touching asks with 0.00 ft; overlap shows the message and goes back', () => {
+    setup();
+    dragSecondTo(3.5);
+    fireEvent.pointerUp(screen.getByTestId('plan-view'));
+    expect(screen.getByText(/This is touching the Chair\. Gap 0\.00 ft/)).toBeTruthy();
+    fireEvent.click(screen.getByText('Cancel'));
+    dragSecondTo(3);
+    expect(screen.getByTestId('clearance-overlap')).toBeTruthy();
+    fireEvent.pointerUp(screen.getByTestId('plan-view'));
+    expect(screen.getByText(/Items cannot overlap\./)).toBeTruthy();
+    expect(useRoomStore.getState().plan!.items[1].position.x).toBe(9);
+  });
+
+  it('a gap of 1.5 ft or more shows no line and no popup', () => {
+    setup();
+    dragSecondTo(5);
+    expect(screen.queryByTestId('clearance-line')).toBeNull();
+    fireEvent.pointerUp(screen.getByTestId('plan-view'));
+    expect(screen.queryByText('Place here')).toBeNull();
+  });
+});

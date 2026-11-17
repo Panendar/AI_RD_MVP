@@ -140,3 +140,80 @@ describe('roomStore.moveItem (REQ-360)', () => {
     expect(item().position).toEqual({ x: 6, y: 5 });
   });
 });
+
+describe('roomStore clearance (REQ-366)', () => {
+  const room = () => useRoomStore.getState().createRoom(12, 10);
+  const s = () => useRoomStore.getState();
+  const ids = () => s().plan!.items.map((i) => i.id);
+
+  it('adding 1.5 ft or more from every item places it with no popup', () => {
+    room();
+    s().addItem('chair', { x: 2, y: 2 });       // 1.5 wide: right edge 2.75
+    s().addItem('chair', { x: 5, y: 2 });       // left edge 4.25: gap 1.5
+    expect(ids()).toHaveLength(2);
+    expect(s().pending).toBeNull();
+    expect(s().notice).toBeNull();
+  });
+
+  it('adding closer than 1.5 ft asks; Cancel removes it, Place here keeps it', () => {
+    room();
+    s().addItem('chair', { x: 2, y: 2 });
+    s().addItem('chair', { x: 4.5, y: 2 });     // gap 1.0
+    expect(s().pending).toMatchObject({ itemId: 'item-2', otherName: 'Chair', gap: 1 });
+    s().cancelPending();
+    expect(ids()).toEqual(['item-1']);
+    s().addItem('chair', { x: 4.5, y: 2 });
+    s().confirmPending();
+    expect(ids()).toHaveLength(2);
+    expect(s().pending).toBeNull();
+  });
+
+  it('touching is allowed but asks, with gap 0', () => {
+    room();
+    s().addItem('chair', { x: 2, y: 2 });
+    s().addItem('chair', { x: 3.5, y: 2 });
+    expect(s().pending?.gap).toBe(0);
+  });
+
+  it('adding over another item is refused with the message and the plan is unchanged', () => {
+    room();
+    s().addItem('chair', { x: 2, y: 2 });
+    const before = s().plan;
+    s().addItem('chair', { x: 2.5, y: 2 });
+    expect(s().notice).toBe('Items cannot overlap.');
+    expect(s().plan!.items).toEqual(before!.items);
+  });
+
+  it('a move that ends overlapping goes back to where it was; one that ends close asks; Cancel goes back', () => {
+    room();
+    s().addItem('chair', { x: 2, y: 2 });
+    s().addItem('chair', { x: 8, y: 2 });
+    s().beginChange('item-2');
+    s().moveItem('item-2', { x: 2.5, y: 2 });
+    s().settleChange('item-2');
+    expect(s().notice).toBe('Items cannot overlap.');
+    expect(s().plan!.items[1].position).toEqual({ x: 8, y: 2 });
+    s().dismissNotice();
+    s().beginChange('item-2');
+    s().moveItem('item-2', { x: 4.5, y: 2 });
+    s().settleChange('item-2');
+    expect(s().pending?.gap).toBe(1);
+    s().cancelPending();
+    expect(s().plan!.items[1].position).toEqual({ x: 8, y: 2 });
+  });
+
+  it('a rotation into another item goes back; selecting without moving asks nothing', () => {
+    room();
+    s().addItem('sofa', { x: 6, y: 5 });
+    s().addItem('chair', { x: 6, y: 8 });        // sofa 3.0 deep: bottom edge 6.5, chair top 7.25: gap 0.75... close
+    s().confirmPending();
+    s().beginChange('item-1');
+    s().settleChange('item-1');
+    expect(s().pending).toBeNull();
+    s().beginChange('item-1');
+    s().rotateItem('item-1', 90);                // 3.0 wide, 6.5 tall: bottom 8.25 hits the chair
+    s().settleChange('item-1');
+    expect(s().notice).toBe('Items cannot overlap.');
+    expect(s().plan!.items[0].rotation).toBe(0);
+  });
+});

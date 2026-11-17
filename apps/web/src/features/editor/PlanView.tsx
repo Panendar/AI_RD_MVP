@@ -10,6 +10,8 @@ import { placeInRoom } from '../../room/placement';
 import { angleFromPoint } from '../../room/rotation';
 import { PlanItem } from './PlanItem';
 import { RotationRing } from './RotationRing';
+import { ClearanceLines } from './ClearanceLines';
+import { useRoomStore } from '../../state/roomStore';
 import { CATALOG_DRAG_TYPE, useDragState } from './dragState';
 import { toPlanPoint } from './toPlanPoint';
 
@@ -34,6 +36,8 @@ export interface PlanViewProps {
   onRotateItem?: (itemId: string, degrees: number) => void;
 }
 
+// A drag or rotate starts / ends here so the clearance rule (REQ-366) can check the result when the pointer is released.
+
 export function PlanView({ room, items = [], onDropItem, onMoveItem, onRotateItem }: PlanViewProps) {
   const { width, length, walls } = room;
   const svgRef = useRef<SVGSVGElement>(null);
@@ -49,6 +53,9 @@ export function PlanView({ room, items = [], onDropItem, onMoveItem, onRotateIte
   // a knob drag in progress: the id of the item being rotated
   const rotating = useRef<string | null>(null);
   const selectedItem = items.find((it) => it.id === selectedId);
+  const beginChange = useRoomStore((s) => s.beginChange);
+  const settleChange = useRoomStore((s) => s.settleChange);
+  const activeId = useRoomStore((s) => s.gesture?.itemId ?? s.pending?.itemId ?? null);
 
   const planPoint = (e: { clientX: number; clientY: number }): Point | null => (svgRef.current ? toPlanPoint(svgRef.current, e.clientX, e.clientY) : null);
   const onItemDown = (item: Item) => (e: PointerEvent<SVGGElement>) => {
@@ -56,12 +63,14 @@ export function PlanView({ room, items = [], onDropItem, onMoveItem, onRotateIte
     selectItem(item.id);
     const p = planPoint(e);
     if (!onMoveItem || !p) return;
+    beginChange(item.id);
     moving.current = { id: item.id, dx: item.position.x - p.x, dy: item.position.y - p.y };
     try { svgRef.current?.setPointerCapture?.(e.pointerId); } catch { /* not capturable */ }
   };
   const onKnobDown = (item: Item) => (e: PointerEvent<SVGGElement>) => {
     if (e.button !== undefined && e.button !== 0) return;
     e.stopPropagation();
+    beginChange(item.id);
     rotating.current = item.id;
     try { svgRef.current?.setPointerCapture?.(e.pointerId); } catch { /* not capturable */ }
   };
@@ -78,7 +87,12 @@ export function PlanView({ room, items = [], onDropItem, onMoveItem, onRotateIte
     const p = planPoint(e);
     if (p) onMoveItem(m.id, { x: p.x + m.dx, y: p.y + m.dy });
   };
-  const endMove = () => { moving.current = null; rotating.current = null; };
+  const endMove = () => {
+    const id = rotating.current ?? moving.current?.id;
+    moving.current = null;
+    rotating.current = null;
+    if (id) settleChange(id);
+  };
 
   const pointOf =(e: DragEvent): Point | null => (svgRef.current ? toPlanPoint(svgRef.current, e.clientX, e.clientY) : null);
   const isCatalogDrag = (e: DragEvent) => draggingId !== null || Array.from(e.dataTransfer?.types ?? []).includes(CATALOG_DRAG_TYPE);
@@ -139,6 +153,7 @@ export function PlanView({ room, items = [], onDropItem, onMoveItem, onRotateIte
       <g data-testid="plan-items">
         {items.map((it) => <PlanItem key={it.id} item={it} selected={it.id === selectedId} onPointerDown={onItemDown(it)} />)}
       </g>
+      <ClearanceLines items={items} activeId={activeId} />
       {selectedItem && onRotateItem && <RotationRing item={selectedItem} onKnobPointerDown={onKnobDown(selectedItem)} />}
       {preview && <PlanItem outline item={{ id: 'drag-outline', rotation: 0, ...preview }} />}
 
