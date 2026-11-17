@@ -1,7 +1,9 @@
 // 2D editor screen (REQ-358: the room; REQ-359: add furniture from the catalog by drag and drop). The room size is shown
 // but never editable here.
-// The 3D tab and Upload/Download JSON are placeholders; their behaviour belongs to REQ-364, REQ-363 and REQ-362.
-import { useRef, useState } from 'react';
+// REQ-362: Download JSON saves room_type.json (refused with a message for an empty room).
+// REQ-363: Upload JSON opens a design from a file (1 MB max, checked, confirm before replacing an open design).
+// The 3D tab is a placeholder; its behaviour belongs to REQ-364.
+import { useRef, useState, type ChangeEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
   AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
@@ -9,6 +11,10 @@ import {
 } from '@chakra-ui/react';
 import { facingLabel, ROTATION_STEP_DEG } from '../../room/rotation';
 import { measureAll, formatGap, RECOMMENDED_GAP_FT } from '../../room/clearance';
+import { DOWNLOAD_FILE_NAME, prepareDownload } from '../../room/exportRoomPlan';
+import { saveTextFile } from '../../room/downloadFile';
+import { INVALID_FILE_MESSAGE, openRoomPlan } from '../../room/openRoomPlan';
+import type { RoomPlan } from '../../room/roomPlan';
 import { useRoomStore } from '../../state/roomStore';
 import { GRID_FT, PlanView } from './PlanView';
 import { CatalogPanel } from './CatalogPanel';
@@ -25,16 +31,41 @@ export function EditorPage() {
   const selectItem = useDragState((s) => s.selectItem);
   const pending = useRoomStore((s) => s.pending);
   const notice = useRoomStore((s) => s.notice);
-  const { beginChange, settleChange, confirmPending, cancelPending, dismissNotice } = useRoomStore.getState();
+  const { beginChange, settleChange, confirmPending, cancelPending, dismissNotice, loadPlan } = useRoomStore.getState();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const downloadOkRef = useRef<HTMLButtonElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const placeCancelRef = useRef<HTMLButtonElement>(null);
   const okRef = useRef<HTMLButtonElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadOkRef = useRef<HTMLButtonElement>(null);
+  const replaceCancelRef = useRef<HTMLButtonElement>(null);
+  const [uploadError, setUploadError] = useState(false);
+  const [toReplace, setToReplace] = useState<{ name: string; plan: RoomPlan } | null>(null);
   if (!plan) return <Navigate to="/" replace />;
   const { width, length } = plan.room;
   const selected = plan.items.find((it) => it.id === selectedId);
   const nearest = selected ? measureAll(plan.items, selected)[0] : undefined;
   const touching = pending !== null && pending.gap === 0;
+
+  const onDownload = () => {
+    const result = prepareDownload(plan);
+    if (result.ok) saveTextFile(DOWNLOAD_FILE_NAME, result.json);
+    else setDownloadError(result.errors.join(' '));
+  };
+
+  const openPlan = (next: RoomPlan) => { loadPlan(next); selectItem(null); };
+
+  const onFileChosen = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';   // the same file can be chosen again
+    if (!file) return;
+    const result = await openRoomPlan(file);
+    if (!result.ok) setUploadError(true);
+    else if (plan.items.length === 0) openPlan(result.plan);
+    else setToReplace({ name: file.name, plan: result.plan });
+  };
 
   return (
     <Flex direction="column" h="100vh">
@@ -45,8 +76,17 @@ export function EditorPage() {
           <Button role="tab" aria-selected="false" size="sm" variant="outline" isDisabled title="Coming soon">3D view</Button>
         </Flex>
         <Flex gap={2} ml="auto">
-          <Button size="sm" variant="outline" isDisabled title="Coming soon">Upload JSON</Button>
-          <Button size="sm" variant="outline" isDisabled title="Coming soon">Download JSON</Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,application/json"
+            hidden
+            aria-label="Choose a design file"
+            data-testid="upload-input"
+            onChange={onFileChosen}
+          />
+          <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>Upload JSON</Button>
+          <Button size="sm" variant="outline" onClick={onDownload}>Download JSON</Button>
         </Flex>
       </Flex>
 
@@ -123,6 +163,48 @@ export function EditorPage() {
             <AlertDialogBody>{notice} The item went back to where it was.</AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={okRef} onClick={dismissNotice}>OK</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
+      <AlertDialog isOpen={downloadError !== null} leastDestructiveRef={downloadOkRef} onClose={() => setDownloadError(null)} isCentered>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>Cannot download</AlertDialogHeader>
+            <AlertDialogBody>{downloadError}</AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={downloadOkRef} onClick={() => setDownloadError(null)}>OK</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
+      <AlertDialog isOpen={uploadError} leastDestructiveRef={uploadOkRef} onClose={() => setUploadError(false)} isCentered>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>Cannot open file</AlertDialogHeader>
+            <AlertDialogBody>{INVALID_FILE_MESSAGE}</AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={uploadOkRef} onClick={() => setUploadError(false)}>OK</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
+      <AlertDialog isOpen={toReplace !== null} leastDestructiveRef={replaceCancelRef} onClose={() => setToReplace(null)} isCentered>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>Replace the current design?</AlertDialogHeader>
+            <AlertDialogBody>Replace the current design with {toReplace?.name}? The current design will be lost.</AlertDialogBody>
+            <AlertDialogFooter gap={2}>
+              <Button ref={replaceCancelRef} onClick={() => setToReplace(null)}>Cancel</Button>
+              <Button
+                colorScheme="blue"
+                onClick={() => { if (toReplace) openPlan(toReplace.plan); setToReplace(null); }}
+              >
+                Replace
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>

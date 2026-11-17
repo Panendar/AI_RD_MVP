@@ -69,9 +69,9 @@ describe('Editor screen', () => {
     useRoomStore.getState().createRoom(12, 10);
     const { container } = editor();
     const inputs = Array.from(container.querySelectorAll('input, select, textarea, [contenteditable="true"]'));
-    expect(inputs.map((i) => i.getAttribute('aria-label'))).toEqual(['Search catalog']);
+    expect(inputs.map((i) => i.getAttribute('aria-label'))).toEqual(['Choose a design file', 'Search catalog']);   // the hidden file input of Upload JSON (REQ-363)
     expect(screen.queryByRole('spinbutton')).toBeNull();
     const enabled = Array.from(container.querySelectorAll('button')).filter((b) => !b.disabled).map((b) => b.textContent);
-    expect(enabled).toEqual(['2D plan']);
+    expect(enabled).toEqual(['2D plan', 'Upload JSON', 'Download JSON']);   // live since REQ-363 and REQ-362
   });
 });

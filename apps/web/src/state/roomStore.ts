@@ -44,6 +44,9 @@ export interface RoomState {
   dismissNotice(): void;
   // Builds the plan for width x length, checks it and keeps it only if it passes. Returns the check errors (empty on success).
   createRoom(width: number, length: number): string[];
+  // Opens a design that already passed the upload checks (REQ-363): replaces the plan as it is and clears the editor state.
+  // It does not run the add/move guards, so no clearance popup appears for items that are close or touching.
+  loadPlan(plan: RoomPlan): void;
   // Adds a catalog item dropped at `drop` (ft): snapped to 0.25 ft, stopped at the walls, facing 0 deg, white.
   // A drop outside the room, or an item that cannot fit, adds nothing.
   addItem(catalogId: string, drop: Point): ChangeResult;
@@ -112,6 +115,7 @@ export const useRoomStore = createAppStore<RoomState>({
     if (result.ok) useRoomStore.setState({ plan });
     return result.errors;
   },
+  loadPlan(plan) { useRoomStore.setState({ plan, gesture: null, pending: null, notice: null }); },
   addItem(catalogId, drop) {
     const plan = useRoomStore.getState().plan;
     if (!plan) return { ok: false, errors: ['There is no room yet.'] };
