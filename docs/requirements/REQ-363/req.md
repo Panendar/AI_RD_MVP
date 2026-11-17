@@ -15,8 +15,8 @@ As a homeowner or interior designer, I can upload a .json design file to open it
   - item ids are unique;
   - every item is inside the walls;
   - every size matches the catalog;
-  - no two items are less than 0.5 ft apart.
-- A valid file replaces the current design. The 2D plan shows **exactly what was saved and shared**, with no red lines or popups even for items 0.5 to 1.5 ft apart (user decision, 2026-11-16). The room size is fixed as in the file.
+  - no two items overlap (touching is allowed; under 0.01 ft counts as touching).
+- A valid file replaces the current design. The 2D plan shows **exactly what was saved and shared**, with no red lines or popups even for items less than 1.5 ft apart or touching (user decisions, 2026-11-16 and 2026-11-17). The room size is fixed as in the file.
 - An invalid file is rejected with a clear message, and the current design stays as it was.
 - After opening, move, rotate, delete and add from the catalog all work on the opened design.
 
