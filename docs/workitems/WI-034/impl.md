@@ -59,6 +59,6 @@ Everything runs in the browser, on top of WI-033 (room model, `useRoomStore`, `c
 ## Assumptions
 - Web only; no API change (the room is in memory, as in WI-033).
 - REQ-366 clearance (red line while dragging, confirm/refuse on drop, 0.5 ft minimum) is its own work item; this item leaves the `beforeAdd` hook for it and does not block close drops.
-- If an item cannot fit in the room at rotation 0 (only the bed, 6.5 ft deep, in a room whose length is under 6.5 ft), the drop adds nothing, like a drop outside the room. No message is required by REQ-359; a short toast "Bed (queen) does not fit in this room" may be shown and is easy to remove.
+- If an item cannot fit in the room at rotation 0 (only the bed, 6.5 ft deep, in a room whose length is under 6.5 ft), the drop adds nothing, like a drop outside the room, and the drag outline is not shown. No message is shown (REQ-359 does not ask for one); a message can be added by its own requirement.
 - New items always face 0° (front toward the bottom wall); rotation is REQ-361.
 - Selecting, moving and deleting items are REQ-360/361; the right "Selected item" panel stays as it is.
