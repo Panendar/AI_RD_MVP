@@ -57,6 +57,6 @@
 ### Screen notes
 - 10 deg rotation step with the mouse; no resizing (user decisions, 2026-11-16).
 - ASCII cannot draw a true 10 deg tilt; the tilted sofa in B is approximate.
-- Delete asks for confirmation (user decision, 2026-11-16). Open questions: undo; typing an exact angle.
+- Delete asks for confirmation (user decision, 2026-11-16). Out of scope: undo; typing an exact angle.
 - Reference: docs/references/rotation.png (rotation ring with live angle) and designs_matress.png (floating toolbar); ai-room-redesign UI Mock 16 and 18.
 - Based on features.md #4 Edit the 2D plan.
