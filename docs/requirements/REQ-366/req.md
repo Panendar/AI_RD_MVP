@@ -34,12 +34,12 @@ As a homeowner or interior designer, I see a red line and a confirmation when I 
 ## Source documents
 - User answers, 2026-11-16 (recommended 1.5 ft, red line, confirmation; no red line after confirmation; shared files open exactly as saved)
 - User decision, 2026-11-17 (items may touch; only overlap is refused; popup kept for touching; the 0.5 ft minimum is removed)
-- docs/project/room-plan-schema.md: business rule 5 (needs the same change, see follow-ups)
+- docs/project/room-plan-schema.md: business rule 5 (updated to match)
 - docs/project/intent.md: G3
 
-## Follow-ups outside this requirement
-- REQ-363 (upload): it rejects a file with any gap under 0.5 ft; it should reject only overlapping items.
-- docs/project/room-plan-schema.md business rule 5: replace the 0.5 ft minimum with "items must not overlap".
+## Related changes made together with this one (2026-11-17)
+- REQ-363 (upload) now rejects a file only when items overlap.
+- docs/project/room-plan-schema.md business rule 5 now says "no two items overlap".
 
 ## Open questions
 - None. (Items may stand against a wall; this rule is only between items.)
