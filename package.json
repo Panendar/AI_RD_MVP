@@ -1,0 +1,14 @@
+{
+  "name": "ai-rd-mvp",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "npm install && cd apps/api && npm install && cd ../web && npm install",
+    "dev": "concurrently -k -n api,web -c blue,magenta \"npm run dev --prefix apps/api\" \"npm run dev --prefix apps/web\"",
+    "build": "npm run build --prefix apps/api && npm run build --prefix apps/web",
+    "test": "npm test --prefix apps/api && npm test --prefix apps/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
