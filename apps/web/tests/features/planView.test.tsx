@@ -65,12 +65,12 @@ describe('Editor screen', () => {
     expect(screen.getByTestId('plan-view')).toBeTruthy();
   });
 
-  it('has no input or control that changes width or length', () => {
+  it('has no input or control that changes width or length (the only input is the catalog search)', () => {
     useRoomStore.getState().createRoom(12, 10);
     const { container } = editor();
-    expect(container.querySelectorAll('input, select, textarea, [contenteditable="true"]').length).toBe(0);
+    const inputs = Array.from(container.querySelectorAll('input, select, textarea, [contenteditable="true"]'));
+    expect(inputs.map((i) => i.getAttribute('aria-label'))).toEqual(['Search catalog']);
     expect(screen.queryByRole('spinbutton')).toBeNull();
-    expect(screen.queryByRole('textbox')).toBeNull();
     const enabled = Array.from(container.querySelectorAll('button')).filter((b) => !b.disabled).map((b) => b.textContent);
     expect(enabled).toEqual(['2D plan']);
   });

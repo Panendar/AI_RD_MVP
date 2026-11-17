@@ -1,12 +1,15 @@
-// 2D editor screen (REQ-358: the empty room). The room size is shown but never editable here.
+// 2D editor screen (REQ-358: the room; REQ-359: add furniture from the catalog by drag and drop). The room size is shown
+// but never editable here.
 // The 3D tab and Upload/Download JSON are placeholders; their behaviour belongs to REQ-364, REQ-363 and REQ-362.
 import { Navigate } from 'react-router-dom';
 import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
 import { useRoomStore } from '../../state/roomStore';
 import { GRID_FT, PlanView } from './PlanView';
+import { CatalogPanel } from './CatalogPanel';
 
 export function EditorPage() {
   const plan = useRoomStore((s) => s.plan);
+  const addItem = useRoomStore((s) => s.addItem);
   if (!plan) return <Navigate to="/" replace />;
   const { width, length } = plan.room;
 
@@ -25,7 +28,8 @@ export function EditorPage() {
       </Flex>
 
       <Flex flex="1" minH={0}>
-        <Box as="aside" aria-label="Room and view" w="220px" p={4} borderRightWidth="1px">
+        <Box as="aside" aria-label="Catalog, room and view" w="240px" p={4} borderRightWidth="1px" overflowY="auto">
+          <Box mb={6}><CatalogPanel /></Box>
           <Heading as="h2" size="xs" mb={1}>ROOM</Heading>
           <Text>Rectangle {width} x {length} ft</Text>
           <Text mb={4} color="gray.600">(size is fixed)</Text>
@@ -36,7 +40,7 @@ export function EditorPage() {
         </Box>
 
         <Box as="main" flex="1" minW={0} p={4}>
-          <PlanView room={plan.room} />
+          <PlanView room={plan.room} items={plan.items} onDropItem={addItem} />
         </Box>
 
         <Box as="aside" aria-label="Selected item" w="220px" p={4} borderLeftWidth="1px">

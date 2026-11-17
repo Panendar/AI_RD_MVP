@@ -1,7 +1,15 @@
 // The 2D plan: an SVG drawn from `plan.room` only, in feet (1 viewBox unit = 1 ft) so the room is to scale.
 // Ruler along the top and left (ticks every 1 ft, labels every 2 ft), grid dots every 2 ft, walls from `room.walls`.
-// Later stories (items, moves, clearance) draw on top of this.
-import type { Room } from '../../room/roomPlan';
+// Items (REQ-359) are drawn on top as white rectangles with their name. When `onDropItem` is given, the plan is a drop
+// target for catalog items: while dragging, a real-size outline shows where the item would land (snapped, stopped at walls).
+// Later stories (moves, clearance) draw on top of this.
+import { useRef, useState, type DragEvent } from 'react';
+import type { Item, Point, Room } from '../../room/roomPlan';
+import { getCatalogEntry } from '../../room/catalog';
+import { placeInRoom } from '../../room/placement';
+import { PlanItem } from './PlanItem';
+import { CATALOG_DRAG_TYPE, useDragState } from './dragState';
+import { toPlanPoint } from './toPlanPoint';
 
 export const RULER_FT = 1.5;           // space for the ruler, outside the room
 export const GRID_FT = 2;
@@ -14,8 +22,41 @@ function steps(max: number, every: number): number[] {
   return out;
 }
 
-export function PlanView({ room }: { room: Room }) {
+export interface PlanViewProps {
+  room: Room;
+  items?: Item[];
+  onDropItem?: (catalogId: string, drop: Point) => void;
+}
+
+export function PlanView({ room, items = [], onDropItem }: PlanViewProps) {
   const { width, length, walls } = room;
+  const svgRef = useRef<SVGSVGElement>(null);
+  const draggingId = useDragState((s) => s.draggingCatalogId);
+  const setDragging = useDragState((s) => s.setDragging);
+  const [preview, setPreview] = useState<{ name: string; position: Point; size: Item['size'] } | null>(null);
+
+  const pointOf = (e: DragEvent): Point | null => (svgRef.current ? toPlanPoint(svgRef.current, e.clientX, e.clientY) : null);
+  const isCatalogDrag = (e: DragEvent) => draggingId !== null || Array.from(e.dataTransfer?.types ?? []).includes(CATALOG_DRAG_TYPE);
+
+  const onDragOver = (e: DragEvent<SVGSVGElement>) => {
+    if (!onDropItem || !isCatalogDrag(e)) return;
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+    const entry = draggingId ? getCatalogEntry(draggingId) : undefined;
+    const p = pointOf(e);
+    const position = entry && p ? placeInRoom(room, entry, p) : null;
+    setPreview(entry && position ? { name: entry.name, position, size: { width: entry.width, depth: entry.depth, height: entry.height } } : null);
+  };
+  const onDrop = (e: DragEvent<SVGSVGElement>) => {
+    if (!onDropItem) return;
+    e.preventDefault();
+    const catalogId = e.dataTransfer?.getData(CATALOG_DRAG_TYPE) || draggingId;
+    const p = pointOf(e);
+    setPreview(null);
+    setDragging(null);
+    if (catalogId && p) onDropItem(catalogId, p);
+  };
+  const clear = () => setPreview(null);
   const vb = `${-RULER_FT} ${-RULER_FT} ${width + RULER_FT + MARGIN_FT} ${length + RULER_FT + MARGIN_FT}`;
   const ticksX = steps(Math.floor(width), 1);
   const ticksY = steps(Math.floor(length), 1);
@@ -27,9 +68,15 @@ export function PlanView({ room }: { room: Room }) {
 
   return (
     <svg
+      ref={svgRef}
       data-testid="plan-view"
       role="img"
-      aria-label={`2D plan of the empty room, ${width} x ${length} ft`}
+      aria-label={items.length === 0
+        ? `2D plan of the empty room, ${width} x ${length} ft`
+        : `2D plan of the room, ${width} x ${length} ft, ${items.length} item${items.length === 1 ? '' : 's'}`}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragLeave={clear}
       viewBox={vb}
       preserveAspectRatio="xMidYMid meet"
       style={{ width: '100%', height: '100%', display: 'block' }}
@@ -39,6 +86,12 @@ export function PlanView({ room }: { room: Room }) {
       <g data-testid="plan-grid" fill="#A0AEC0">
         {dots.map((d) => <circle key={`${d.x},${d.y}`} cx={d.x} cy={d.y} r={0.07} />)}
       </g>
+
+      {/* items under the walls, so a wall line stays visible where an item touches it */}
+      <g data-testid="plan-items">
+        {items.map((it) => <PlanItem key={it.id} item={it} />)}
+      </g>
+      {preview && <PlanItem outline item={{ id: 'drag-outline', rotation: 0, ...preview }} />}
 
       <g data-testid="plan-walls" stroke="#1A202C" strokeWidth={0.15} strokeLinecap="square">
         {walls.map((w) => (

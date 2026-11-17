@@ -44,6 +44,39 @@ describe('checkRoomPlan', () => {
   });
 });
 
+describe('checkRoomPlan item rules (REQ-359)', () => {
+  const sofa = (over: Record<string, unknown> = {}) => ({
+    id: 'item-1', catalogId: 'sofa', name: 'Sofa (3 seat)', position: { x: 6, y: 5 },
+    size: { width: 6.5, depth: 3.0, height: 2.75 }, rotation: 0, colour: '#FFFFFF', ...over
+  });
+  const withItems = (...items: unknown[]) => ({ ...clone(createRoomPlan(12, 10)), items });
+
+  it('a plan with a valid item passes', () => {
+    expect(checkRoomPlan(withItems(sofa()))).toEqual({ ok: true, errors: [] });
+  });
+
+  it('duplicated item ids fail rule 2', () => {
+    const r = checkRoomPlan(withItems(sofa(), sofa({ position: { x: 6, y: 1.5 } })));
+    expect(r.ok).toBe(false);
+    expect(r.errors.join(' ')).toMatch(/used more than once/);
+  });
+
+  it('an item crossing a wall fails rule 3, also after rotation', () => {
+    expect(checkRoomPlan(withItems(sofa({ position: { x: 2, y: 5 } }))).errors.join(' ')).toMatch(/crosses a wall/);
+    expect(checkRoomPlan(withItems(sofa({ position: { x: 6, y: 2 }, rotation: 90 }))).errors.join(' ')).toMatch(/crosses a wall/);
+    expect(checkRoomPlan(withItems(sofa({ position: { x: 3.25, y: 1.5 } }))).ok).toBe(true);
+  });
+
+  it('an item not at its catalog size fails rule 4', () => {
+    const r = checkRoomPlan(withItems(sofa({ size: { width: 6, depth: 3.0, height: 2.75 } })));
+    expect(r.errors.join(' ')).toMatch(/catalog size/);
+  });
+
+  it('the schema rejects a colour other than white', () => {
+    expect(checkRoomPlan(withItems(sofa({ colour: '#FF0000' }))).ok).toBe(false);
+  });
+});
+
 describe('room store', () => {
   afterEach(() => useRoomStore.getState().reset());
 
@@ -60,6 +93,6 @@ describe('room store', () => {
 
   it('offers no action that changes the room size', () => {
     const actions = Object.entries(useRoomStore.getState()).filter(([, v]) => typeof v === 'function').map(([k]) => k).sort();
-    expect(actions).toEqual(['createRoom', 'reset']);
+    expect(actions).toEqual(['addItem', 'createRoom', 'reset']);
   });
 });
