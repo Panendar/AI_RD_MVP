@@ -3,7 +3,7 @@
 Requirement: REQ-361 - Work item: WI-037 - Application: web (apps/web)
 
 ## Scope
-Covers the acceptance criteria of REQ-361: rotating the selected item by dragging the knob on the rotation ring (10 degree steps), the Rotate 10 button (350 -> 0), a rotation that would cross a wall not being applied, Delete with a confirmation (confirm and cancel), the room JSON matching the plan straight away, and no control to change an item's size. Not covered: undo after delete, typing an exact angle, right-click rotation, clearance between items (REQ-366), touch devices.
+Covers the acceptance criteria of REQ-361 and that rotated items stop touching the walls with no gap: rotating the selected item by dragging the knob on the rotation ring (10 degree steps), the Rotate 10 button (350 -> 0), a rotation that would cross a wall not being applied, Delete with a confirmation (confirm and cancel), the room JSON matching the plan straight away, and no control to change an item's size. Not covered: undo after delete, typing an exact angle, right-click rotation, clearance between items (REQ-366), touch devices.
 
 ## Preconditions
 - Web app running (desktop browser). A room of 12 x 10 ft has been created (REQ-358) and the 2D plan is shown.
@@ -90,12 +90,19 @@ Expected: the plan is the empty room; `items` is `[]`; the room size and walls a
 
 Expected: no resize handles and no size field or button anywhere; the panel shows W, D, H as text with "(size is fixed)".
 
-### S14 Mouse and button give the same result (AC1, AC2)
+### S14 No gap between a rotated item and the wall (user report, 2026-11-17)
+1. Add a Locker (3.0 x 1.75 ft). Select it and press Rotate 10 nine times (or drag the knob) to 90 deg, so it stands upright.
+2. Drag the locker into the top-left corner, past the walls.
+3. Zoom in on the left wall and on the top wall.
+
+Expected: the locker touches both walls; there is no visible space between its edge and the wall (the left edge is at most 0.005 ft from the wall). The panel centre is X 0.88, Y 1.50 and the same values are in `items[0].position` in the JSON. Repeat against the right and bottom walls (centre X 11.12 and Y 8.5 in a 12 x 10 room): again no gap. Away from the walls the position still moves in 0.25 ft steps. Downloading the JSON passes the schema check.
+
+### S15 Mouse and button give the same result (AC1, AC2)
 1. Rotate one sofa to 30 deg with the knob, and another to 30 deg with Rotate 10 pressed three times.
 
 Expected: both sofas have `rotation` 30 in the JSON and look identical (apart from their position).
 
-### S15 Rotation keeps the item's position (AC1)
+### S16 Rotation keeps the item's position (AC1)
 1. Note the centre in the panel, rotate with the knob and with the button, then read the centre again.
 
 Expected: the centre X and Y are the same as before (the item turns around its centre); only `rotation` changed.
@@ -105,4 +112,4 @@ Expected: the centre X and Y are the same as before (the item turns around its c
 - Clearance between items when rotating near them (REQ-366).
 
 ## Automated coverage (already in the repo)
-- `tests/room/rotation.test.ts` (10 deg snap, wrap to 0, angle convention), `tests/state/roomStore.test.ts` (rotateItem, rotateItemStep, deleteItem, refused at a wall), `tests/features/rotateDelete.test.tsx` (ring, knob drag, Rotate 10, wall refusal, delete confirm and cancel, no size control). They use a mocked pointer position, so this plan's manual run in a real browser is what checks real mouse dragging.
+- `tests/room/rotation.test.ts` (10 deg snap, wrap to 0, angle convention), `tests/state/roomStore.test.ts` (rotateItem, rotateItemStep, deleteItem, refused at a wall), `tests/room/placement.test.ts` (items touch the walls, no gap), `tests/features/rotateDelete.test.tsx` (ring, knob drag, Rotate 10, wall refusal, delete confirm and cancel, no size control). They use a mocked pointer position, so this plan's manual run in a real browser is what checks real mouse dragging.
