@@ -43,5 +43,6 @@
 
 ### Screen notes
 - 3D in its own tab (user decision, 2026-11-16).
-- The camera returns to the start view on every visit (user decision, 2026-11-16). Open question: is the 3D tab view-only.
+- The camera returns to the start view on every visit (user decision, 2026-11-16).
+- The 3D tab is view-only: no selecting or editing items there; all edits are made in the 2D tab (user decision, 2026-11-17).
 - Based on features.md #8 3D preview.

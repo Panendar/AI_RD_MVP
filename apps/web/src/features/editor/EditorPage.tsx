@@ -2,7 +2,7 @@
 // but never editable here.
 // REQ-362: Download JSON saves room_type.json (refused with a message for an empty room).
 // REQ-363: Upload JSON opens a design from a file (1 MB max, checked, confirm before replacing an open design).
-// The 3D tab is a placeholder; its behaviour belongs to REQ-364.
+// REQ-364: the 3D tab shows the same room JSON as a white 3D room (read-only, always from the start view).
 import { useRef, useState, type ChangeEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
@@ -19,6 +19,7 @@ import { useRoomStore } from '../../state/roomStore';
 import { GRID_FT, PlanView } from './PlanView';
 import { CatalogPanel } from './CatalogPanel';
 import { useDragState } from './dragState';
+import { ThreeDView } from './ThreeDView';
 
 export function EditorPage() {
   const plan = useRoomStore((s) => s.plan);
@@ -42,6 +43,7 @@ export function EditorPage() {
   const uploadOkRef = useRef<HTMLButtonElement>(null);
   const replaceCancelRef = useRef<HTMLButtonElement>(null);
   const [uploadError, setUploadError] = useState(false);
+  const [tab, setTab] = useState<'2d' | '3d'>('2d');
   const [toReplace, setToReplace] = useState<{ name: string; plan: RoomPlan } | null>(null);
   if (!plan) return <Navigate to="/" replace />;
   const { width, length } = plan.room;
@@ -72,8 +74,8 @@ export function EditorPage() {
       <Flex as="header" align="center" gap={4} px={4} py={2} borderBottomWidth="1px" wrap="wrap">
         <Heading as="h1" size="md">Room {width} x {length} ft (fixed)</Heading>
         <Flex role="tablist" aria-label="Views" gap={2}>
-          <Button role="tab" aria-selected="true" size="sm" colorScheme="blue">2D plan</Button>
-          <Button role="tab" aria-selected="false" size="sm" variant="outline" isDisabled title="Coming soon">3D view</Button>
+          <Button role="tab" aria-selected={tab === '2d'} size="sm" colorScheme="blue" variant={tab === '2d' ? 'solid' : 'outline'} onClick={() => setTab('2d')}>2D plan</Button>
+          <Button role="tab" aria-selected={tab === '3d'} size="sm" colorScheme="blue" variant={tab === '3d' ? 'solid' : 'outline'} onClick={() => setTab('3d')}>3D view</Button>
         </Flex>
         <Flex gap={2} ml="auto">
           <input
@@ -90,7 +92,12 @@ export function EditorPage() {
         </Flex>
       </Flex>
 
-      <Flex flex="1" minH={0}>
+      {tab === '3d' && (
+        <Box as="main" flex="1" minH={0} p={4}>
+          <ThreeDView plan={plan} />
+        </Box>
+      )}
+      <Flex flex="1" minH={0} display={tab === '2d' ? 'flex' : 'none'}>
         <Box as="aside" aria-label="Catalog, room and view" w="240px" p={4} borderRightWidth="1px" overflowY="auto">
           <Box mb={6}><CatalogPanel /></Box>
           <Heading as="h2" size="xs" mb={1}>ROOM</Heading>

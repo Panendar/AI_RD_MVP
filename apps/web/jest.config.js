@@ -5,6 +5,7 @@ module.exports = {
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   transform: { '^.+\\.tsx?$': 'ts-jest' },
+  moduleNameMapper: { '^three/examples/jsm/controls/OrbitControls(\\.js)?$': '<rootDir>/src/testing/orbitControlsStub.ts' },
   setupFilesAfterEnv: ['<rootDir>/src/testing/setup.ts'],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/app/{providers,router,theme,config}.{ts,tsx}', '!src/main.tsx', '!**/*.d.ts'],
   coverageThreshold: { global: { statements: 80, lines: 80, functions: 80, branches: 70 } }
