@@ -1,0 +1,14 @@
+{
+  "name": "room-designer",
+  "title": "AI RD MVP",
+  "spec": "docs/project/context.md",
+  "walkthroughs": [
+    {
+      "id": "design-and-share",
+      "title": "Design a room and share it as a file",
+      "description": "Asha (homeowner) creates a 12 x 10 ft room, adds, moves, rotates and deletes furniture under the clearance rule, checks it in 3D and downloads the JSON. Vikram (interior designer) opens the file, keeps editing and sees it in 3D. REQ-358 to REQ-366.",
+      "sequenceFile": "sequences/design-and-share.json",
+      "seedData": "mock-app/mock-data/seeds/design-and-share.json"
+    }
+  ]
+}

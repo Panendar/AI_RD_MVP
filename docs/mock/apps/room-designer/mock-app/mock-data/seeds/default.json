@@ -1,0 +1,46 @@
+{
+  "_sample": "Sample data only. Names, file names, ids and positions are invented to illustrate the spec.",
+  "room": {
+    "width": 12,
+    "length": 10,
+    "created": false
+  },
+  "plan": {
+    "items": [],
+    "selected": null,
+    "pending": null,
+    "popup": "none",
+    "popupText": "",
+    "redLine": null,
+    "note": "",
+    "opened": null,
+    "downloaded": false,
+    "zoom": {
+      "level": 1,
+      "cx": 6,
+      "cy": 5
+    }
+  },
+  "json": {
+    "items": 0,
+    "last": "none yet",
+    "check": "OK"
+  },
+  "upload": {
+    "picker": false,
+    "error": false,
+    "errorText": "item-2 (TV) is 0.25 ft from item-1; items must be at least 0.5 ft apart.",
+    "files": [
+      {
+        "name": "broken-design.json",
+        "note": "sample: breaks the 0.5 ft rule",
+        "action": "choose-invalid"
+      },
+      {
+        "name": "living-room.json",
+        "note": "sample: the file Asha sent",
+        "action": "choose-valid"
+      }
+    ]
+  }
+}

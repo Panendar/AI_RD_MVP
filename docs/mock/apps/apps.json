@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "room-designer",
+      "title": "AI RD MVP",
+      "platform": "desktop"
+    }
+  ]
+}

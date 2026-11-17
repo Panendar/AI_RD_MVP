@@ -1,0 +1,29 @@
+[
+  {
+    "code": "S01",
+    "name": "New room",
+    "section": "REQ-358 (UI Mock 1)",
+    "type": "form",
+    "mode": "create",
+    "buttons": ["Create room", "Upload JSON (placement assumed, gap 1)"],
+    "fields": ["Shape (Rectangle, fixed)", "Width ft (6-30, 0.25 steps)", "Length ft (6-30, 0.25 steps)", "Walls (10 ft, fixed)"]
+  },
+  {
+    "code": "S02",
+    "name": "2D plan",
+    "section": "REQ-358, REQ-359, REQ-360, REQ-361, REQ-366, REQ-362, REQ-363 (UI Mocks 1-7)",
+    "type": "editor",
+    "mode": "edit",
+    "buttons": ["2D plan tab", "3D view tab", "Upload JSON", "Download JSON", "Rotate 10", "Delete", "Place here", "Cancel", "OK"],
+    "fields": ["Catalog search", "Catalog items (drag and drop)", "Selected item: size, centre, rotation"]
+  },
+  {
+    "code": "S03",
+    "name": "3D view",
+    "section": "REQ-364, REQ-365 (UI Mocks 8-9)",
+    "type": "viewer",
+    "mode": "view",
+    "buttons": ["2D plan tab", "3D view tab", "Upload JSON", "Download JSON", "Reset view"],
+    "fields": []
+  }
+]

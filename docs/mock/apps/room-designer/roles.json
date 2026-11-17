@@ -1,0 +1,10 @@
+{
+  "homeowner": {
+    "label": "Homeowner",
+    "color": "#2563eb"
+  },
+  "designer": {
+    "label": "Interior designer",
+    "color": "#9333ea"
+  }
+}

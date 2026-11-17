@@ -1,0 +1,1248 @@
+{
+  "id": "design-and-share",
+  "title": "Design a room and share it as a file",
+  "startStep": "new-room",
+  "completionMessage": "{users.homeowner.name} built a 12 x 10 ft room, placed furniture under the 1.5 ft / 0.5 ft clearance rule, checked it in 3D and downloaded it. {users.designer.name} opened that file exactly as saved, added a locker and saw it in 3D. In the real app one room JSON holds the design at every step, and the file can go back and forth while both keep editing.",
+  "steps": {
+    "new-room": {
+      "user": "homeowner",
+      "screen": "S01",
+      "proposedAction": "Keep 12 x 10 ft and click Create room",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "create-room": {
+          "performedText": "created a 12 x 10 ft room",
+          "nextStep": "empty-plan",
+          "stateChange": {
+            "room.created": {
+              "set": true
+            },
+            "json.last": {
+              "set": "new room 12 x 10 ft, height 10, 4 walls, items []"
+            }
+          }
+        }
+      }
+    },
+    "empty-plan": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Drag the Sofa from the catalog onto the room",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "drop-sofa": {
+          "performedText": "dropped the sofa into the room",
+          "nextStep": "sofa-placed",
+          "stateChange": {
+            "plan.items": {
+              "set": [
+                {
+                  "id": "item-1",
+                  "catalogId": "sofa",
+                  "name": "Sofa (3 seat)",
+                  "position": {
+                    "x": 3.75,
+                    "y": 2
+                  },
+                  "size": {
+                    "width": 6.5,
+                    "depth": 3,
+                    "height": 2.75
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                }
+              ]
+            },
+            "plan.selected": {
+              "set": "item-1"
+            },
+            "json.items": 1,
+            "json.last": {
+              "set": "items[0] added: sofa at x 3.75, y 2.00, rotation 0"
+            }
+          }
+        }
+      }
+    },
+    "sofa-placed": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Drag the sofa to the right, past the right wall",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "drag-selected": {
+          "performedText": "dragged the sofa past the right wall",
+          "nextStep": "sofa-at-wall",
+          "stateChange": {
+            "plan.items": {
+              "set": [
+                {
+                  "id": "item-1",
+                  "catalogId": "sofa",
+                  "name": "Sofa (3 seat)",
+                  "position": {
+                    "x": 8.75,
+                    "y": 2
+                  },
+                  "size": {
+                    "width": 6.5,
+                    "depth": 3,
+                    "height": 2.75
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                }
+              ]
+            },
+            "plan.note": {
+              "set": "Dragged past the right wall: the sofa stopped touching it (centre x 8.75)."
+            },
+            "json.last": {
+              "set": "items[0].position.x 3.75 -> 8.75 (0.25 ft steps)"
+            }
+          }
+        }
+      }
+    },
+    "sofa-at-wall": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Drag the Table under the sofa, 1 ft from it",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "drop-table": {
+          "performedText": "dropped the table 1.00 ft from the sofa",
+          "nextStep": "table-too-close",
+          "stateChange": {
+            "plan.selected": {
+              "set": null
+            },
+            "plan.note": {
+              "set": ""
+            },
+            "plan.pending": {
+              "set": {
+                "id": "item-2",
+                "catalogId": "table",
+                "name": "Table (4 seat)",
+                "position": {
+                  "x": 8,
+                  "y": 5.75
+                },
+                "size": {
+                  "width": 4,
+                  "depth": 2.5,
+                  "height": 2.5
+                },
+                "rotation": 0,
+                "colour": "#FFFFFF"
+              }
+            },
+            "plan.popup": {
+              "set": "clearance"
+            },
+            "plan.popupText": {
+              "set": "This table is 1.00 ft from the Sofa. We recommend at least 1.5 ft between items. Would you like to place it here?"
+            },
+            "plan.redLine": {
+              "set": {
+                "x1": 8,
+                "y1": 3.5,
+                "x2": 8,
+                "y2": 4.5,
+                "label": "1.00 ft",
+                "to": "Sofa"
+              }
+            }
+          }
+        }
+      }
+    },
+    "table-too-close": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Click Place here",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "place-here": {
+          "performedText": "confirmed the 1.00 ft gap",
+          "nextStep": "zoom-check",
+          "stateChange": {
+            "plan.popup": {
+              "set": "none"
+            },
+            "plan.popupText": {
+              "set": ""
+            },
+            "plan.redLine": {
+              "set": null
+            },
+            "plan.pending": {
+              "set": null
+            },
+            "plan.items": {
+              "set": [
+                {
+                  "id": "item-1",
+                  "catalogId": "sofa",
+                  "name": "Sofa (3 seat)",
+                  "position": {
+                    "x": 8.75,
+                    "y": 2
+                  },
+                  "size": {
+                    "width": 6.5,
+                    "depth": 3,
+                    "height": 2.75
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-2",
+                  "catalogId": "table",
+                  "name": "Table (4 seat)",
+                  "position": {
+                    "x": 8,
+                    "y": 5.75
+                  },
+                  "size": {
+                    "width": 4,
+                    "depth": 2.5,
+                    "height": 2.5
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                }
+              ]
+            },
+            "json.items": 1,
+            "plan.note": {
+              "set": "Placed. The red line is gone and is not shown again for this placement."
+            },
+            "json.last": {
+              "set": "items[1] added: table at x 8.00, y 5.75 (confirmed 1.00 ft gap)"
+            }
+          }
+        }
+      }
+    },
+    "zoom-check": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Optional: click Zoom in to look closely at the gap between the sofa and the table",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "zoom-in": {
+          "performedText": "zoomed in on the gap",
+          "nextStep": "zoomed",
+          "stateChange": {
+            "plan.zoom": {
+              "set": {
+                "level": 2.5,
+                "cx": 8,
+                "cy": 4
+              }
+            },
+            "plan.note": {
+              "set": "Zoomed in on the 1.00 ft gap. Zoom is the user's choice; the plan always opens showing the whole room."
+            }
+          }
+        }
+      }
+    },
+    "zoomed": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Click Fit to see the whole room again",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "zoom-fit": {
+          "performedText": "went back to the whole room",
+          "nextStep": "table-placed",
+          "stateChange": {
+            "plan.zoom": {
+              "set": {
+                "level": 1,
+                "cx": 6,
+                "cy": 5
+              }
+            },
+            "plan.note": {
+              "set": ""
+            }
+          }
+        }
+      }
+    },
+    "table-placed": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Drag the Chair right next to the table",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "drop-chair": {
+          "performedText": "dropped the chair 0.25 ft from the table",
+          "nextStep": "chair-refused",
+          "stateChange": {
+            "plan.note": {
+              "set": ""
+            },
+            "plan.pending": {
+              "set": {
+                "id": "item-3",
+                "catalogId": "chair",
+                "name": "Chair",
+                "position": {
+                  "x": 5,
+                  "y": 5.75
+                },
+                "size": {
+                  "width": 1.5,
+                  "depth": 1.5,
+                  "height": 3
+                },
+                "rotation": 0,
+                "colour": "#FFFFFF"
+              }
+            },
+            "plan.popup": {
+              "set": "refused"
+            },
+            "plan.popupText": {
+              "set": "The chair is 0.25 ft from the Table. It goes back; the room JSON does not change."
+            },
+            "plan.redLine": {
+              "set": {
+                "x1": 5.75,
+                "y1": 5.75,
+                "x2": 6,
+                "y2": 5.75,
+                "label": "0.25 ft",
+                "to": "Table"
+              }
+            }
+          }
+        }
+      }
+    },
+    "chair-refused": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Click OK",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "ok-refused": {
+          "performedText": "saw the chair refused",
+          "nextStep": "chair-again",
+          "stateChange": {
+            "plan.popup": {
+              "set": "none"
+            },
+            "plan.popupText": {
+              "set": ""
+            },
+            "plan.redLine": {
+              "set": null
+            },
+            "plan.pending": {
+              "set": null
+            },
+            "plan.note": {
+              "set": "Refused: the chair was not added."
+            }
+          }
+        }
+      }
+    },
+    "chair-again": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Drag the Chair to the free lower-left area",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "drop-chair": {
+          "performedText": "dropped the chair with room to spare",
+          "nextStep": "chair-placed",
+          "stateChange": {
+            "plan.note": {
+              "set": ""
+            },
+            "plan.items": {
+              "set": [
+                {
+                  "id": "item-1",
+                  "catalogId": "sofa",
+                  "name": "Sofa (3 seat)",
+                  "position": {
+                    "x": 8.75,
+                    "y": 2
+                  },
+                  "size": {
+                    "width": 6.5,
+                    "depth": 3,
+                    "height": 2.75
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-2",
+                  "catalogId": "table",
+                  "name": "Table (4 seat)",
+                  "position": {
+                    "x": 8,
+                    "y": 5.75
+                  },
+                  "size": {
+                    "width": 4,
+                    "depth": 2.5,
+                    "height": 2.5
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-3",
+                  "catalogId": "chair",
+                  "name": "Chair",
+                  "position": {
+                    "x": 2,
+                    "y": 7
+                  },
+                  "size": {
+                    "width": 1.5,
+                    "depth": 1.5,
+                    "height": 3
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                }
+              ]
+            },
+            "plan.selected": {
+              "set": "item-3"
+            },
+            "json.items": 1,
+            "json.last": {
+              "set": "items[2] added: chair at x 2.00, y 7.00 (gaps 1.5 ft or more: no popup)"
+            }
+          }
+        }
+      }
+    },
+    "chair-placed": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Click Rotate 10°",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "rotate-10": {
+          "performedText": "rotated the chair 10° clockwise",
+          "nextStep": "chair-rotated",
+          "stateChange": {
+            "plan.items": {
+              "set": [
+                {
+                  "id": "item-1",
+                  "catalogId": "sofa",
+                  "name": "Sofa (3 seat)",
+                  "position": {
+                    "x": 8.75,
+                    "y": 2
+                  },
+                  "size": {
+                    "width": 6.5,
+                    "depth": 3,
+                    "height": 2.75
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-2",
+                  "catalogId": "table",
+                  "name": "Table (4 seat)",
+                  "position": {
+                    "x": 8,
+                    "y": 5.75
+                  },
+                  "size": {
+                    "width": 4,
+                    "depth": 2.5,
+                    "height": 2.5
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-3",
+                  "catalogId": "chair",
+                  "name": "Chair",
+                  "position": {
+                    "x": 2,
+                    "y": 7
+                  },
+                  "size": {
+                    "width": 1.5,
+                    "depth": 1.5,
+                    "height": 3
+                  },
+                  "rotation": 10,
+                  "colour": "#FFFFFF"
+                }
+              ]
+            },
+            "json.last": {
+              "set": "items[2].rotation 0 -> 10"
+            }
+          }
+        }
+      }
+    },
+    "chair-rotated": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Click Delete",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "delete-item": {
+          "performedText": "asked to delete the chair",
+          "nextStep": "confirm-delete",
+          "stateChange": {
+            "plan.popup": {
+              "set": "delete"
+            },
+            "plan.popupText": {
+              "set": "Delete Chair?"
+            }
+          }
+        }
+      }
+    },
+    "confirm-delete": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Click Delete to confirm",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "confirm-delete": {
+          "performedText": "deleted the chair",
+          "nextStep": "two-items",
+          "stateChange": {
+            "plan.popup": {
+              "set": "none"
+            },
+            "plan.popupText": {
+              "set": ""
+            },
+            "plan.redLine": {
+              "set": null
+            },
+            "plan.pending": {
+              "set": null
+            },
+            "plan.items": {
+              "set": [
+                {
+                  "id": "item-1",
+                  "catalogId": "sofa",
+                  "name": "Sofa (3 seat)",
+                  "position": {
+                    "x": 8.75,
+                    "y": 2
+                  },
+                  "size": {
+                    "width": 6.5,
+                    "depth": 3,
+                    "height": 2.75
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-2",
+                  "catalogId": "table",
+                  "name": "Table (4 seat)",
+                  "position": {
+                    "x": 8,
+                    "y": 5.75
+                  },
+                  "size": {
+                    "width": 4,
+                    "depth": 2.5,
+                    "height": 2.5
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                }
+              ]
+            },
+            "plan.selected": {
+              "set": null
+            },
+            "json.items": -1,
+            "json.last": {
+              "set": "items[2] removed (chair)"
+            }
+          }
+        }
+      }
+    },
+    "two-items": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Open the 3D view tab",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "goto-S03": {
+          "performedText": "opened the 3D view",
+          "nextStep": "asha-3d"
+        }
+      }
+    },
+    "asha-3d": {
+      "user": "homeowner",
+      "screen": "S03",
+      "proposedAction": "Go back to the 2D plan tab",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "goto-S02": {
+          "performedText": "went back to the 2D plan",
+          "nextStep": "ready-to-download"
+        }
+      }
+    },
+    "ready-to-download": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Click Download JSON",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "download-json": {
+          "performedText": "downloaded the design",
+          "nextStep": "downloaded",
+          "stateChange": {
+            "plan.downloaded": {
+              "set": true
+            },
+            "json.last": {
+              "set": "saved as a .json file (schema v1.0, 2 items)"
+            }
+          }
+        }
+      }
+    },
+    "downloaded": {
+      "user": "homeowner",
+      "screen": "S02",
+      "proposedAction": "Send the file to {users.designer.name}",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "performedText": "sent the file to {users.designer.name}",
+      "nextStep": "designer-start",
+      "stateChange": {
+        "plan.downloaded": {
+          "set": false
+        },
+        "plan.items": {
+          "set": []
+        },
+        "json.items": {
+          "set": 0
+        },
+        "json.last": {
+          "set": "nothing open yet (another browser)"
+        }
+      }
+    },
+    "designer-start": {
+      "user": "designer",
+      "screen": "S01",
+      "proposedAction": "Open the file Asha sent",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "notDefined": "The spec puts Upload JSON only in the editor header (Mocks 1-9). It does not say how someone with no room open (the person receiving a shared file) reaches Upload JSON. This mock assumes a button on the New room screen (gap 1).",
+      "performedText": "looked for Upload JSON",
+      "nextStep": "designer-upload"
+    },
+    "designer-upload": {
+      "user": "designer",
+      "screen": "S01",
+      "proposedAction": "Click Upload JSON",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "upload-json": {
+          "performedText": "opened the file picker",
+          "nextStep": "pick-invalid",
+          "stateChange": {
+            "upload.picker": {
+              "set": true
+            }
+          }
+        }
+      }
+    },
+    "pick-invalid": {
+      "user": "designer",
+      "screen": "S01",
+      "proposedAction": "Choose broken-design.json first, to see a rejection",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "choose-invalid": {
+          "performedText": "chose an invalid file",
+          "nextStep": "invalid-file",
+          "stateChange": {
+            "upload.picker": {
+              "set": false
+            },
+            "upload.error": {
+              "set": true
+            },
+            "json.check": {
+              "set": "FAILED: gap under 0.5 ft"
+            }
+          }
+        }
+      }
+    },
+    "invalid-file": {
+      "user": "designer",
+      "screen": "S01",
+      "proposedAction": "Click OK",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "ok-invalid": {
+          "performedText": "saw the file rejected",
+          "nextStep": "designer-upload-again",
+          "stateChange": {
+            "upload.error": {
+              "set": false
+            },
+            "json.check": {
+              "set": "OK (nothing replaced)"
+            }
+          }
+        }
+      }
+    },
+    "designer-upload-again": {
+      "user": "designer",
+      "screen": "S01",
+      "proposedAction": "Click Upload JSON again",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "upload-json": {
+          "performedText": "opened the file picker again",
+          "nextStep": "pick-valid",
+          "stateChange": {
+            "upload.picker": {
+              "set": true
+            }
+          }
+        }
+      }
+    },
+    "pick-valid": {
+      "user": "designer",
+      "screen": "S01",
+      "proposedAction": "Choose living-room.json",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "choose-valid": {
+          "performedText": "opened the shared design",
+          "nextStep": "opened",
+          "stateChange": {
+            "upload.picker": {
+              "set": false
+            },
+            "plan.items": {
+              "set": [
+                {
+                  "id": "item-1",
+                  "catalogId": "sofa",
+                  "name": "Sofa (3 seat)",
+                  "position": {
+                    "x": 8.75,
+                    "y": 2
+                  },
+                  "size": {
+                    "width": 6.5,
+                    "depth": 3,
+                    "height": 2.75
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-2",
+                  "catalogId": "table",
+                  "name": "Table (4 seat)",
+                  "position": {
+                    "x": 8,
+                    "y": 5.75
+                  },
+                  "size": {
+                    "width": 4,
+                    "depth": 2.5,
+                    "height": 2.5
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                }
+              ]
+            },
+            "plan.opened": {
+              "set": "living-room.json"
+            },
+            "plan.note": {
+              "set": ""
+            },
+            "json.items": {
+              "set": 2
+            },
+            "json.check": {
+              "set": "OK"
+            },
+            "json.last": {
+              "set": "replaced by living-room.json: exactly as saved"
+            }
+          }
+        }
+      }
+    },
+    "opened": {
+      "user": "designer",
+      "screen": "S02",
+      "proposedAction": "Drag the Locker into the top-left corner",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "drop-locker": {
+          "performedText": "added a locker",
+          "nextStep": "locker-added",
+          "stateChange": {
+            "plan.items": {
+              "set": [
+                {
+                  "id": "item-1",
+                  "catalogId": "sofa",
+                  "name": "Sofa (3 seat)",
+                  "position": {
+                    "x": 8.75,
+                    "y": 2
+                  },
+                  "size": {
+                    "width": 6.5,
+                    "depth": 3,
+                    "height": 2.75
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-2",
+                  "catalogId": "table",
+                  "name": "Table (4 seat)",
+                  "position": {
+                    "x": 8,
+                    "y": 5.75
+                  },
+                  "size": {
+                    "width": 4,
+                    "depth": 2.5,
+                    "height": 2.5
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                },
+                {
+                  "id": "item-4",
+                  "catalogId": "locker",
+                  "name": "Locker (steel almirah)",
+                  "position": {
+                    "x": 1.75,
+                    "y": 1
+                  },
+                  "size": {
+                    "width": 3,
+                    "depth": 1.75,
+                    "height": 6.5
+                  },
+                  "rotation": 0,
+                  "colour": "#FFFFFF"
+                }
+              ]
+            },
+            "plan.selected": {
+              "set": "item-4"
+            },
+            "plan.opened": {
+              "set": null
+            },
+            "json.items": 1,
+            "json.last": {
+              "set": "items[2] added: locker at x 1.75, y 1.00"
+            }
+          }
+        }
+      }
+    },
+    "locker-added": {
+      "user": "designer",
+      "screen": "S02",
+      "proposedAction": "Open the 3D view tab",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "actions": {
+        "goto-S03": {
+          "performedText": "opened the 3D view",
+          "nextStep": "designer-3d"
+        }
+      }
+    },
+    "designer-3d": {
+      "user": "designer",
+      "screen": "S03",
+      "proposedAction": "Look round the room in 3D",
+      "infoPanel": [
+        {
+          "key": "json.items",
+          "label": "Items in room JSON"
+        },
+        {
+          "key": "json.last",
+          "label": "Last room JSON change"
+        },
+        {
+          "key": "json.check",
+          "label": "Schema + rules check"
+        }
+      ],
+      "performedText": "saw the locker in 3D with no refresh",
+      "nextStep": null
+    }
+  }
+}
