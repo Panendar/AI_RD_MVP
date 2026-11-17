@@ -9,7 +9,7 @@ import { footprintBounds } from './placement';
 export interface CheckResult { ok: boolean; errors: string[] }
 export type Rule = (plan: RoomPlan) => string[];
 
-const ajv = new Ajv2020({ allErrors: true });
+const ajv = new Ajv2020({ allErrors: true, multipleOfPrecision: 6 });
 const validateSchema = ajv.compile(schema) as ValidateFunction<RoomPlan>;
 
 // Rule 1: the walls form the rectangle (0,0)-(width,length), clockwise top, right, bottom, left.

@@ -6,6 +6,7 @@ import { createRoomPlan, type Item, type Point, type RoomPlan } from '../room/ro
 import { checkRoomPlan } from '../room/checkRoomPlan';
 import { getCatalogEntry } from '../room/catalog';
 import { clampCentre, nextItemId, placeInRoom } from '../room/placement';
+import { snapAngle } from '../room/rotation';
 
 export interface ChangeResult { ok: boolean; errors: string[] }
 
@@ -17,6 +18,10 @@ export const beforeAddItem: AddItemGuard[] = [];
 export type MoveItemGuard = (plan: RoomPlan, item: Item, to: Point) => boolean;
 export const beforeMoveItem: MoveItemGuard[] = [];
 
+// Hook point for REQ-366 (clearance): sees the plan, the item and its new angle; returns false to stop the rotation.
+export type RotateItemGuard = (plan: RoomPlan, item: Item, rotation: number) => boolean;
+export const beforeRotateItem: RotateItemGuard[] = [];
+
 export interface RoomState {
   plan: RoomPlan | null;
   // Builds the plan for width x length, checks it and keeps it only if it passes. Returns the check errors (empty on success).
@@ -26,6 +31,13 @@ export interface RoomState {
   addItem(catalogId: string, drop: Point): ChangeResult;
   // Moves an item to `to` (ft): snapped to 0.25 ft and stopped at the walls. Only `position` changes.
   moveItem(itemId: string, to: Point): ChangeResult;
+  // Turns an item to `degrees` (snapped to 10 degrees, clockwise, 0..350) around its centre. A rotation that would take any
+  // part of the item outside the walls is not applied: the item keeps its last angle. Only `rotation` changes.
+  rotateItem(itemId: string, degrees: number): ChangeResult;
+  // Turns an item 10 degrees clockwise (350 becomes 0).
+  rotateItemStep(itemId: string): ChangeResult;
+  // Removes an item from the plan. An unknown id changes nothing.
+  deleteItem(itemId: string): ChangeResult;
 }
 
 export const useRoomStore = createAppStore<RoomState>({
@@ -68,6 +80,32 @@ export const useRoomStore = createAppStore<RoomState>({
     if (position.x === item.position.x && position.y === item.position.y) return { ok: true, errors: [] };
     if (!beforeMoveItem.every((guard) => guard(plan, item, position))) return { ok: false, errors: [] };
     const next: RoomPlan = { ...plan, items: plan.items.map((it) => (it.id === itemId ? { ...it, position } : it)) };
+    const result = checkRoomPlan(next);
+    if (result.ok) useRoomStore.setState({ plan: next });
+    return result;
+  },
+  rotateItem(itemId, degrees) {
+    const plan = useRoomStore.getState().plan;
+    if (!plan) return { ok: false, errors: ['There is no room yet.'] };
+    const item = plan.items.find((it) => it.id === itemId);
+    if (!item) return { ok: false, errors: [`Unknown item "${itemId}".`] };
+    const rotation = snapAngle(degrees);
+    if (rotation === item.rotation) return { ok: true, errors: [] };
+    if (!beforeRotateItem.every((guard) => guard(plan, item, rotation))) return { ok: false, errors: [] };
+    const next: RoomPlan = { ...plan, items: plan.items.map((it) => (it.id === itemId ? { ...it, rotation } : it)) };
+    const result = checkRoomPlan(next);
+    if (result.ok) useRoomStore.setState({ plan: next });
+    return result;
+  },
+  rotateItemStep(itemId): ChangeResult {
+    const item = useRoomStore.getState().plan?.items.find((it: Item) => it.id === itemId);
+    return useRoomStore.getState().rotateItem(itemId, (item?.rotation ?? 0) + 10);
+  },
+  deleteItem(itemId) {
+    const plan = useRoomStore.getState().plan;
+    if (!plan) return { ok: false, errors: ['There is no room yet.'] };
+    if (!plan.items.some((it) => it.id === itemId)) return { ok: false, errors: [`Unknown item "${itemId}".`] };
+    const next: RoomPlan = { ...plan, items: plan.items.filter((it) => it.id !== itemId) };
     const result = checkRoomPlan(next);
     if (result.ok) useRoomStore.setState({ plan: next });
     return result;

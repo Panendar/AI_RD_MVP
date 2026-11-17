@@ -1,8 +1,13 @@
 // 2D editor screen (REQ-358: the room; REQ-359: add furniture from the catalog by drag and drop). The room size is shown
 // but never editable here.
 // The 3D tab and Upload/Download JSON are placeholders; their behaviour belongs to REQ-364, REQ-363 and REQ-362.
+import { useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
+import {
+  AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
+  Box, Button, Flex, Heading, Text
+} from '@chakra-ui/react';
+import { facingLabel, ROTATION_STEP_DEG } from '../../room/rotation';
 import { useRoomStore } from '../../state/roomStore';
 import { GRID_FT, PlanView } from './PlanView';
 import { CatalogPanel } from './CatalogPanel';
@@ -12,7 +17,13 @@ export function EditorPage() {
   const plan = useRoomStore((s) => s.plan);
   const addItem = useRoomStore((s) => s.addItem);
   const moveItem = useRoomStore((s) => s.moveItem);
+  const rotateItem = useRoomStore((s) => s.rotateItem);
+  const rotateItemStep = useRoomStore((s) => s.rotateItemStep);
+  const deleteItem = useRoomStore((s) => s.deleteItem);
   const selectedId = useDragState((s) => s.selectedItemId);
+  const selectItem = useDragState((s) => s.selectItem);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const cancelRef = useRef<HTMLButtonElement>(null);
   if (!plan) return <Navigate to="/" replace />;
   const { width, length } = plan.room;
   const selected = plan.items.find((it) => it.id === selectedId);
@@ -44,7 +55,7 @@ export function EditorPage() {
         </Box>
 
         <Box as="main" flex="1" minW={0} p={4}>
-          <PlanView room={plan.room} items={plan.items} onDropItem={addItem} onMoveItem={moveItem} />
+          <PlanView room={plan.room} items={plan.items} onDropItem={addItem} onMoveItem={moveItem} onRotateItem={rotateItem} />
         </Box>
 
         <Box as="aside" aria-label="Selected item" w="220px" p={4} borderLeftWidth="1px">
@@ -54,8 +65,15 @@ export function EditorPage() {
               <Text fontWeight="bold">{selected.name}</Text>
               <Text>W {selected.size.width}  D {selected.size.depth}  H {selected.size.height} ft</Text>
               <Text>Centre  X {selected.position.x.toFixed(2)}  Y {selected.position.y.toFixed(2)}</Text>
+              <Text>(size is fixed)</Text>
               <Text>Rotation  {selected.rotation} deg</Text>
-              <Text mt={2} color="gray.600">Drag to move. Moves snap to 0.25 ft.</Text>
+              <Text>Facing: {facingLabel(selected.rotation)}</Text>
+              <Text>Step: {ROTATION_STEP_DEG} deg</Text>
+              <Text mt={2} color="gray.600">Drag to move. Moves snap to 0.25 ft. Drag the knob around the ring, or press Rotate 10.</Text>
+              <Flex mt={3} gap={2}>
+                <Button size="sm" onClick={() => rotateItemStep(selected.id)}>Rotate 10</Button>
+                <Button size="sm" colorScheme="red" variant="outline" onClick={() => setConfirmDelete(true)}>Delete</Button>
+              </Flex>
             </Box>
           ) : (
             <>
@@ -65,6 +83,27 @@ export function EditorPage() {
           )}
         </Box>
       </Flex>
+
+      <AlertDialog isOpen={confirmDelete && !!selected} leastDestructiveRef={cancelRef} onClose={() => setConfirmDelete(false)} isCentered>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>Delete {selected?.name}?</AlertDialogHeader>
+            <AlertDialogBody>It is removed from the plan and from the room JSON.</AlertDialogBody>
+            <AlertDialogFooter gap={2}>
+              <Button ref={cancelRef} onClick={() => setConfirmDelete(false)}>Cancel</Button>
+              <Button
+                colorScheme="red"
+                onClick={() => {
+                  if (selected) { deleteItem(selected.id); selectItem(null); }
+                  setConfirmDelete(false);
+                }}
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Flex>
   );
 }

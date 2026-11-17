@@ -9,7 +9,7 @@ Status: draft, from the user's decisions on 2026-11-16. Used by REQ-358 (create)
   - `x` runs to the right, along the room **width**.
   - `y` runs down the plan, along the room **length**.
   - `z` runs up from the floor (used by 3D). All items stand on the floor (z = 0).
-- **Item position:** the **centre of the item's footprint**, measured from the origin. It is the point the item rotates around. Moves snap to **0.25 ft**, so `x` and `y` are multiples of 0.25.
+- **Item position:** the **centre of the item's footprint**, measured from the origin. It is the point the item rotates around. Moves snap to **0.25 ft**, except against a wall: an item always stops touching the wall (user decision, 2026-11-17: no gap, like in real life), so next to a wall `x` or `y` is exact to **0.01 ft** (for example a locker 1.75 ft deep turned 90� against the left wall has `x` 0.875 -> 0.88). `x` and `y` are multiples of 0.01.
 - **Item size:** `width` (side to side, seen from the front), `depth` (front to back) and `height` (floor to top). It comes from the catalog and cannot be edited.
 - **Facing (`rotation`):** the direction the item's **front** points, in degrees clockwise in the 2D plan, in 10° steps (0, 10 ... 350).
   - `0` = the front faces the **bottom wall** (+y), the "south" of the plan.
@@ -126,10 +126,10 @@ The sofa's back is against the top wall and its seat faces down the room (0°). 
         "name":      { "type": "string", "minLength": 1 },
         "position": {
           "type": "object", "additionalProperties": false, "required": ["x", "y"],
-          "description": "Centre of the footprint, ft from the origin, multiples of 0.25",
+          "description": "Centre of the footprint, ft from the origin, multiples of 0.01 (0.25 away from walls; exact where the item touches a wall)",
           "properties": {
-            "x": { "type": "number", "minimum": 0, "multipleOf": 0.25 },
-            "y": { "type": "number", "minimum": 0, "multipleOf": 0.25 }
+            "x": { "type": "number", "minimum": 0, "multipleOf": 0.01 },
+            "y": { "type": "number", "minimum": 0, "multipleOf": 0.01 }
           }
         },
         "size": {

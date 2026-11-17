@@ -1,8 +1,70 @@
 /** @jest-environment node */
-import { beforeAddItem, beforeMoveItem, useRoomStore } from '../../src/state/roomStore';
+import { beforeAddItem, beforeMoveItem, beforeRotateItem, useRoomStore } from '../../src/state/roomStore';
 import { checkRoomPlan } from '../../src/room/checkRoomPlan';
 
-afterEach(() => { useRoomStore.getState().reset(); beforeAddItem.length = 0; beforeMoveItem.length = 0; });
+afterEach(() => { useRoomStore.getState().reset(); beforeAddItem.length = 0; beforeMoveItem.length = 0; beforeRotateItem.length = 0; });
+
+describe('roomStore.rotateItem and deleteItem (REQ-361)', () => {
+  const setup = (at = { x: 6, y: 5 }) => {
+    useRoomStore.getState().createRoom(12, 10);
+    useRoomStore.getState().addItem('sofa', at);
+    return () => useRoomStore.getState().plan!.items[0];
+  };
+
+  it('rotates in 10 degree steps and only changes rotation', () => {
+    const item = setup();
+    const before = item();
+    expect(useRoomStore.getState().rotateItem('item-1', 14).ok).toBe(true);
+    expect(item()).toEqual({ ...before, rotation: 10 });
+  });
+
+  it('rotateItemStep turns 10 clockwise and 350 goes to 0', () => {
+    const item = setup();
+    useRoomStore.getState().rotateItemStep('item-1');
+    expect(item().rotation).toBe(10);
+    useRoomStore.getState().rotateItem('item-1', 350);
+    useRoomStore.getState().rotateItemStep('item-1');
+    expect(item().rotation).toBe(0);
+  });
+
+  it('a rotation that would cross a wall is not applied', () => {
+    const item = setup({ x: 8.75, y: 1.5 });   // sofa pressed into the top-right corner
+    expect(useRoomStore.getState().rotateItem('item-1', 10).ok).toBe(false);
+    expect(item().rotation).toBe(0);
+  });
+
+  it('no room or unknown id changes nothing', () => {
+    expect(useRoomStore.getState().rotateItem('item-1', 10).ok).toBe(false);
+    setup();
+    expect(useRoomStore.getState().rotateItem('item-9', 10).ok).toBe(false);
+    expect(useRoomStore.getState().deleteItem('item-9').ok).toBe(false);
+    expect(useRoomStore.getState().plan!.items).toHaveLength(1);
+  });
+
+  it('a guard can stop a rotation', () => {
+    const item = setup();
+    beforeRotateItem.push(() => false);
+    expect(useRoomStore.getState().rotateItem('item-1', 10).ok).toBe(false);
+    expect(item().rotation).toBe(0);
+  });
+
+  it('a locker turned 90 deg moved into the top-left corner touches both walls and passes the schema check', () => {
+    useRoomStore.getState().createRoom(12, 10);
+    useRoomStore.getState().addItem('locker', { x: 6, y: 5 });
+    useRoomStore.getState().rotateItem('item-1', 90);
+    expect(useRoomStore.getState().moveItem('item-1', { x: 0, y: 0 }).ok).toBe(true);
+    const plan = useRoomStore.getState().plan!;
+    expect(plan.items[0].position).toEqual({ x: 0.88, y: 1.5 });   // left edge 0.005 ft from the wall at most, top edge on it
+    expect(checkRoomPlan(plan).ok).toBe(true);
+  });
+
+  it('deleteItem removes only that item', () => {
+    setup();
+    useRoomStore.getState().addItem('tv', { x: 2, y: 2 });
+    expect(useRoomStore.getState().deleteItem('item-1').ok).toBe(true);
+    expect(useRoomStore.getState().plan!.items.map((i) => i.id)).toEqual(['item-2']);
+  });
+});
 
 describe('roomStore.addItem', () => {
   it('without a room adds nothing', () => {

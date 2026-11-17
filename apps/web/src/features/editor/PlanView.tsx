@@ -7,7 +7,9 @@ import { useRef, useState, type DragEvent, type PointerEvent } from 'react';
 import type { Item, Point, Room } from '../../room/roomPlan';
 import { getCatalogEntry } from '../../room/catalog';
 import { placeInRoom } from '../../room/placement';
+import { angleFromPoint } from '../../room/rotation';
 import { PlanItem } from './PlanItem';
+import { RotationRing } from './RotationRing';
 import { CATALOG_DRAG_TYPE, useDragState } from './dragState';
 import { toPlanPoint } from './toPlanPoint';
 
@@ -28,9 +30,11 @@ export interface PlanViewProps {
   onDropItem?: (catalogId: string, drop: Point) => void;
   // When given, items can be moved by dragging (REQ-360). Clicking an item always selects it.
   onMoveItem?: (itemId: string, to: Point) => void;
+  // When given, the selected item shows a rotation ring; dragging its knob turns the item (REQ-361).
+  onRotateItem?: (itemId: string, degrees: number) => void;
 }
 
-export function PlanView({ room, items = [], onDropItem, onMoveItem }: PlanViewProps) {
+export function PlanView({ room, items = [], onDropItem, onMoveItem, onRotateItem }: PlanViewProps) {
   const { width, length, walls } = room;
   const svgRef = useRef<SVGSVGElement>(null);
   const draggingId = useDragState((s) => s.draggingCatalogId);
@@ -42,6 +46,10 @@ export function PlanView({ room, items = [], onDropItem, onMoveItem }: PlanViewP
   // an item drag in progress: which item, and the offset between the pointer and the item's centre
   const moving = useRef<{ id: string; dx: number; dy: number } | null>(null);
 
+  // a knob drag in progress: the id of the item being rotated
+  const rotating = useRef<string | null>(null);
+  const selectedItem = items.find((it) => it.id === selectedId);
+
   const planPoint = (e: { clientX: number; clientY: number }): Point | null => (svgRef.current ? toPlanPoint(svgRef.current, e.clientX, e.clientY) : null);
   const onItemDown = (item: Item) => (e: PointerEvent<SVGGElement>) => {
     if (e.button !== undefined && e.button !== 0) return;
@@ -51,13 +59,26 @@ export function PlanView({ room, items = [], onDropItem, onMoveItem }: PlanViewP
     moving.current = { id: item.id, dx: item.position.x - p.x, dy: item.position.y - p.y };
     try { svgRef.current?.setPointerCapture?.(e.pointerId); } catch { /* not capturable */ }
   };
+  const onKnobDown = (item: Item) => (e: PointerEvent<SVGGElement>) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    e.stopPropagation();
+    rotating.current = item.id;
+    try { svgRef.current?.setPointerCapture?.(e.pointerId); } catch { /* not capturable */ }
+  };
   const onPointerMove = (e: PointerEvent<SVGSVGElement>) => {
+    const rid = rotating.current;
+    if (rid && onRotateItem) {
+      const item = items.find((it) => it.id === rid);
+      const p = planPoint(e);
+      if (item && p) onRotateItem(rid, angleFromPoint(item.position, p));
+      return;
+    }
     const m = moving.current;
     if (!m || !onMoveItem) return;
     const p = planPoint(e);
     if (p) onMoveItem(m.id, { x: p.x + m.dx, y: p.y + m.dy });
   };
-  const endMove = () => { moving.current = null; };
+  const endMove = () => { moving.current = null; rotating.current = null; };
 
   const pointOf =(e: DragEvent): Point | null => (svgRef.current ? toPlanPoint(svgRef.current, e.clientX, e.clientY) : null);
   const isCatalogDrag = (e: DragEvent) => draggingId !== null || Array.from(e.dataTransfer?.types ?? []).includes(CATALOG_DRAG_TYPE);
@@ -118,6 +139,7 @@ export function PlanView({ room, items = [], onDropItem, onMoveItem }: PlanViewP
       <g data-testid="plan-items">
         {items.map((it) => <PlanItem key={it.id} item={it} selected={it.id === selectedId} onPointerDown={onItemDown(it)} />)}
       </g>
+      {selectedItem && onRotateItem && <RotationRing item={selectedItem} onKnobPointerDown={onKnobDown(selectedItem)} />}
       {preview && <PlanItem outline item={{ id: 'drag-outline', rotation: 0, ...preview }} />}
 
       <g data-testid="plan-walls" stroke="#1A202C" strokeWidth={0.15} strokeLinecap="square">

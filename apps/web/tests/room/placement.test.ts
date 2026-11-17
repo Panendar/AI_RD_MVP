@@ -22,9 +22,9 @@ describe('placement', () => {
     expect(placeInRoom(room, sofa, { x: 11.9, y: 9.9 })).toEqual({ x: 8.75, y: 8.5 });
   });
 
-  it('keeps positions on the 0.25 grid for odd half sizes (locker depth 1.75)', () => {
-    expect(placeInRoom(room, locker, { x: 6, y: 0 })).toEqual({ x: 6, y: 1 });
-    expect(placeInRoom(room, locker, { x: 6, y: 10 })).toEqual({ x: 6, y: 9 });
+  it('touches the wall for odd half sizes, no gap (locker depth 1.75)', () => {
+    expect(placeInRoom(room, locker, { x: 6, y: 0 })).toEqual({ x: 6, y: 0.88 });
+    expect(placeInRoom(room, locker, { x: 6, y: 10 })).toEqual({ x: 6, y: 9.12 });
   });
 
   it('adds nothing when dropped outside the room', () => {
@@ -65,10 +65,19 @@ describe('clampCentre (REQ-360)', () => {
     const c = clampCentre(room, { size, rotation: 90 }, { x: 99, y: 99 })!;
     expect(c).toEqual({ x: 10.5, y: 6.75 });
   });
-  it('keeps multiples of 0.25 for odd sizes (locker 1.75 deep)', () => {
+  it('touches the wall for odd sizes, no gap (locker 1.75 deep)', () => {
     const c = clampCentre(room, { size: { width: 3, depth: 1.75, height: 6.5 }, rotation: 0 }, { x: 5, y: 99 })!;
-    expect(c.y % 0.25).toBe(0);
+    expect(c.y).toBe(9.12);
     expect(c.y + 0.875).toBeLessThanOrEqual(10);
+    expect(10 - (c.y + 0.875)).toBeLessThan(0.011);
+  });
+  it('a locker turned 90 deg touches the left and top walls (no gap)', () => {
+    const c = clampCentre(room, { size: { width: 3, depth: 1.75, height: 6.5 }, rotation: 90 }, { x: -9, y: -9 })!;
+    expect(c).toEqual({ x: 0.88, y: 1.5 });
+    expect(c.x - 0.875).toBeLessThanOrEqual(0.005 + 1e-9);
+  });
+  it('away from walls positions stay on the 0.25 grid', () => {
+    expect(clampCentre(room, { size: { width: 3, depth: 1.75, height: 6.5 }, rotation: 90 }, { x: 5.1, y: 4.9 })).toEqual({ x: 5, y: 5 });
   });
   it('returns null when the item cannot fit', () => {
     expect(clampCentre({ width: 6, length: 6 }, { size: { width: 7, depth: 1, height: 1 }, rotation: 0 }, { x: 3, y: 3 })).toBeNull();

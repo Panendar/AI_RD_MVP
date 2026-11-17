@@ -144,17 +144,17 @@
             "x",
             "y"
           ],
-          "description": "Centre of the footprint, ft from the origin, multiples of 0.25",
+          "description": "Centre of the footprint, ft from the origin, multiples of 0.01 (0.25 away from walls; exact where the item touches a wall)",
           "properties": {
             "x": {
               "type": "number",
               "minimum": 0,
-              "multipleOf": 0.25
+              "multipleOf": 0.01
             },
             "y": {
               "type": "number",
               "minimum": 0,
-              "multipleOf": 0.25
+              "multipleOf": 0.01
             }
           }
         },

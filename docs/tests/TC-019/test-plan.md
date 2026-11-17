@@ -49,11 +49,11 @@ Expected: the sofa stops touching the walls and is not outside the room. Centre 
 
 Expected: centre (3.25, 1.5); the left edge is at 0 and the top edge at 0, touching the walls. JSON position (3.25, 1.5).
 
-### S7 Small and odd-sized items stay on the 0.25 ft grid (AC2, AC3)
+### S7 Small and odd-sized items touch the wall, no gap (AC2, AC3)
 1. Add a Locker (3.0 x 1.75 ft). Drag it past the bottom wall.
 2. Add a Chair (1.5 x 1.5 ft). Drag it into the top-left corner.
 
-Expected: Locker bottom edge touches the bottom wall; its centre Y is 9.0 (a multiple of 0.25, edge at 9.875, the nearest grid position inside the wall) and the item is not outside the room. Chair centre (0.75, 0.75), touching both walls. Both positions in the JSON are multiples of 0.25.
+Expected: Locker bottom edge touches the bottom wall with no gap; its centre Y is 9.12 (edge at 9.995, exact to 0.01 ft, rounded inward; user decision 2026-11-17) and the item is not outside the room. Chair centre (0.75, 0.75), touching both walls. Positions away from walls are multiples of 0.25.
 
 ### S8 Wall-stop applies to the whole item, not just the centre (AC3)
 1. Drag the Bed (5.0 x 6.5 ft) to the right wall, then to the bottom wall.
@@ -64,7 +64,7 @@ Expected: the bed's edge touches the wall, not its centre. Bed centre X max 9.5,
 1. Move the sofa and the chair several times each, in different directions, with the wall hit at least once.
 2. Compare the JSON `items` with the state before the moves.
 
-Expected: same ids, same order, same count of items; only `position` values changed; every position is a multiple of 0.25 ft; the JSON passes the schema check; the room size and walls are unchanged.
+Expected: same ids, same order, same count of items; only `position` values changed; every position is a multiple of 0.25 ft (or exact to 0.01 ft where an odd-sized item touches a wall); the JSON passes the schema check; the room size and walls are unchanged.
 
 ## Out of scope (not tested here)
 - Arrow keys, multi-select, deselecting (needs a new requirement).
