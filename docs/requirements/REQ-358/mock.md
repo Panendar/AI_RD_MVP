@@ -43,7 +43,7 @@
 
 ### Main interactions
 - Type a width and a length in feet; the preview follows as you type.
-- An invalid value (empty, zero, negative, not a number) shows a message under the field and Create room does nothing.
+- An invalid value (empty, not a number, below 6 ft, above 30 ft, or not a 0.25 ft step) shows a message under the field and Create room does nothing.
 - Create room builds the room JSON (schema v1.0, see docs/project/room-plan-schema.md), checks it and opens the 2D editor: the empty room at true scale with a ruler in feet and a grid.
 - The room size is fixed after this step; the editor has no control to change it.
 

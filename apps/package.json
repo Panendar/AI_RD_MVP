@@ -1,0 +1,11 @@
+{
+  "name": "ai-rd-mvp-apps",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,magenta \"npm run dev --prefix api\" \"npm run dev --prefix web\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

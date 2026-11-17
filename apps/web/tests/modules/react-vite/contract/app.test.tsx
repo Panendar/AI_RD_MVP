@@ -26,8 +26,11 @@ describe('app shell contract', () => {
     expect(container.firstChild).toBe(outer);
   });
 
-  it('works with the scaffold glue as it is (no modules registered yet: the not-found page)', () => {
-    render(<App Router={at('/')} />);
+  it('works with the scaffold glue as it is (registered routes render, others show the not-found page)', () => {
+    const { unmount } = render(<App Router={at('/')} />);
+    expect(screen.getByRole('heading', { name: 'Start a new room' })).toBeTruthy();
+    unmount();
+    render(<App Router={at('/nope')} />);
     expect(screen.getByText('Page not found')).toBeTruthy();
   });
 

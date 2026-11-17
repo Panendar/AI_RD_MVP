@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "room-plan.schema.json",
+  "title": "Room plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "units",
+    "origin",
+    "room",
+    "items"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "units": {
+      "const": "ft"
+    },
+    "origin": {
+      "const": "top-left",
+      "description": "(0,0) is the top-left floor corner; x right along width, y down along length, z up"
+    },
+    "room": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "length",
+        "height",
+        "walls"
+      ],
+      "properties": {
+        "width": {
+          "type": "number",
+          "minimum": 6,
+          "maximum": 30,
+          "multipleOf": 0.25
+        },
+        "length": {
+          "type": "number",
+          "minimum": 6,
+          "maximum": 30,
+          "multipleOf": 0.25
+        },
+        "height": {
+          "const": 10,
+          "description": "Wall height in ft; fixed for normal Indian homes"
+        },
+        "walls": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "from",
+              "to"
+            ],
+            "properties": {
+              "id": {
+                "enum": [
+                  "top",
+                  "right",
+                  "bottom",
+                  "left"
+                ]
+              },
+              "from": {
+                "$ref": "#/$defs/point"
+              },
+              "to": {
+                "$ref": "#/$defs/point"
+              }
+            }
+          }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "$defs": {
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "catalogId",
+        "name",
+        "position",
+        "size",
+        "rotation",
+        "colour"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "catalogId": {
+          "enum": [
+            "bed",
+            "sofa",
+            "table",
+            "chair",
+            "tv",
+            "locker"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "position": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y"
+          ],
+          "description": "Centre of the footprint, ft from the origin, multiples of 0.25",
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": 0,
+              "multipleOf": 0.25
+            },
+            "y": {
+              "type": "number",
+              "minimum": 0,
+              "multipleOf": 0.25
+            }
+          }
+        },
+        "size": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "width",
+            "depth",
+            "height"
+          ],
+          "properties": {
+            "width": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "depth": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "rotation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 350,
+          "multipleOf": 10,
+          "description": "Facing: degrees clockwise; 0 = front faces the bottom wall (+y)"
+        },
+        "colour": {
+          "const": "#FFFFFF"
+        }
+      }
+    }
+  }
+}
