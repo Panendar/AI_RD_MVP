@@ -5,7 +5,7 @@
 | AI RD MVP   Room 12 x 10 ft (fixed)     [* 2D plan *]  [ 3D view ]     [ Upload JSON ]   [ Download JSON ] |
 +------------------------------------------------------------------------------------------------------------+
 |                                                                       ^ click, choose <design>.json        |
-| CHECKING <design>.json  ->  schema v1.0  ->  rules (walls, ids, inside walls, catalog sizes, 0.5 ft gaps)  |
+| CHECKING <design>.json  ->  schema v1.0  ->  rules (walls, ids, inside walls, catalog sizes, no overlap )  |
 +------------------------------------------------------------------------------------------------------------+
 | A. FILE IS VALID  ->  the design opens exactly as it was downloaded                                        |
 +--------------------------+------------------------------------------------------+--------------------------+
@@ -25,8 +25,8 @@
 | B. FILE IS NOT VALID                                                                                       |
 | +----------------------------------------------------------+                                               |
 | | ! This file is not a valid room design.                  |   The design on screen is NOT replaced.       |
-| |   <reason, e.g. "item-2 (TV) is 0.25 ft from item-1;     |   Wording and detail: open question.          |
-| |    items must be at least 0.5 ft apart">                 |                                               |
+| |   <reason, e.g. "item-2 (TV) overlaps item-1;            |   Wording and detail: open question.          |
+| |    items must not overlap">                              |                                               |
 | |                                                          |                                               |
 | |                                              [ OK ]      |                                               |
 | +----------------------------------------------------------+                                               |
