@@ -1,8 +1,8 @@
 /** @jest-environment node */
-import { beforeAddItem, useRoomStore } from '../../src/state/roomStore';
+import { beforeAddItem, beforeMoveItem, useRoomStore } from '../../src/state/roomStore';
 import { checkRoomPlan } from '../../src/room/checkRoomPlan';
 
-afterEach(() => { useRoomStore.getState().reset(); beforeAddItem.length = 0; });
+afterEach(() => { useRoomStore.getState().reset(); beforeAddItem.length = 0; beforeMoveItem.length = 0; });
 
 describe('roomStore.addItem', () => {
   it('without a room adds nothing', () => {
@@ -47,5 +47,34 @@ describe('roomStore.addItem', () => {
     beforeAddItem.push(() => false);
     expect(useRoomStore.getState().addItem('sofa', { x: 6, y: 5 }).ok).toBe(false);
     expect(useRoomStore.getState().plan!.items).toEqual([]);
+  });
+});
+
+describe('roomStore.moveItem (REQ-360)', () => {
+  const setup = () => { useRoomStore.getState().createRoom(12, 10); useRoomStore.getState().addItem('sofa', { x: 6, y: 5 }); };
+  const item = () => useRoomStore.getState().plan!.items[0];
+
+  it('moves only the position, snapped to 0.25 ft', () => {
+    setup();
+    const before = item();
+    expect(useRoomStore.getState().moveItem('item-1', { x: 7.3, y: 6.6 })).toEqual({ ok: true, errors: [] });
+    expect(item()).toEqual({ ...before, position: { x: 7.25, y: 6.5 } });
+    expect(checkRoomPlan(useRoomStore.getState().plan!).ok).toBe(true);
+  });
+  it('stops at the wall', () => {
+    setup();
+    useRoomStore.getState().moveItem('item-1', { x: 50, y: 50 });
+    expect(item().position).toEqual({ x: 8.75, y: 8.5 });
+  });
+  it('ignores unknown items and no room', () => {
+    expect(useRoomStore.getState().moveItem('item-1', { x: 1, y: 1 }).ok).toBe(false);
+    setup();
+    expect(useRoomStore.getState().moveItem('nope', { x: 1, y: 1 }).ok).toBe(false);
+  });
+  it('a guard can stop the move', () => {
+    setup();
+    beforeMoveItem.push(() => false);
+    expect(useRoomStore.getState().moveItem('item-1', { x: 7, y: 7 }).ok).toBe(false);
+    expect(item().position).toEqual({ x: 6, y: 5 });
   });
 });

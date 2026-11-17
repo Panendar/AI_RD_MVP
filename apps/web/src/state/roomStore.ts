@@ -5,13 +5,17 @@ import { createAppStore } from './createStore';
 import { createRoomPlan, type Item, type Point, type RoomPlan } from '../room/roomPlan';
 import { checkRoomPlan } from '../room/checkRoomPlan';
 import { getCatalogEntry } from '../room/catalog';
-import { nextItemId, placeInRoom } from '../room/placement';
+import { clampCentre, nextItemId, placeInRoom } from '../room/placement';
 
 export interface ChangeResult { ok: boolean; errors: string[] }
 
 // Hook point for REQ-366 (clearance): each guard sees the plan and the item about to be added and returns false to stop it.
 export type AddItemGuard = (plan: RoomPlan, item: Item) => boolean;
 export const beforeAddItem: AddItemGuard[] = [];
+
+// Hook point for REQ-366 (clearance): sees the plan, the item and its new centre; returns false to stop the move.
+export type MoveItemGuard = (plan: RoomPlan, item: Item, to: Point) => boolean;
+export const beforeMoveItem: MoveItemGuard[] = [];
 
 export interface RoomState {
   plan: RoomPlan | null;
@@ -20,6 +24,8 @@ export interface RoomState {
   // Adds a catalog item dropped at `drop` (ft): snapped to 0.25 ft, stopped at the walls, facing 0 deg, white.
   // A drop outside the room, or an item that cannot fit, adds nothing.
   addItem(catalogId: string, drop: Point): ChangeResult;
+  // Moves an item to `to` (ft): snapped to 0.25 ft and stopped at the walls. Only `position` changes.
+  moveItem(itemId: string, to: Point): ChangeResult;
 }
 
 export const useRoomStore = createAppStore<RoomState>({
@@ -48,6 +54,20 @@ export const useRoomStore = createAppStore<RoomState>({
     };
     if (!beforeAddItem.every((guard) => guard(plan, item))) return { ok: false, errors: [] };
     const next: RoomPlan = { ...plan, items: [...plan.items, item] };
+    const result = checkRoomPlan(next);
+    if (result.ok) useRoomStore.setState({ plan: next });
+    return result;
+  },
+  moveItem(itemId, to) {
+    const plan = useRoomStore.getState().plan;
+    if (!plan) return { ok: false, errors: ['There is no room yet.'] };
+    const item = plan.items.find((it) => it.id === itemId);
+    if (!item) return { ok: false, errors: [`Unknown item "${itemId}".`] };
+    const position = clampCentre(plan.room, item, to);
+    if (!position) return { ok: false, errors: [] };
+    if (position.x === item.position.x && position.y === item.position.y) return { ok: true, errors: [] };
+    if (!beforeMoveItem.every((guard) => guard(plan, item, position))) return { ok: false, errors: [] };
+    const next: RoomPlan = { ...plan, items: plan.items.map((it) => (it.id === itemId ? { ...it, position } : it)) };
     const result = checkRoomPlan(next);
     if (result.ok) useRoomStore.setState({ plan: next });
     return result;

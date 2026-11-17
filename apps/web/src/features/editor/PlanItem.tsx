@@ -1,5 +1,6 @@
 // One furniture item in the 2D plan: a white rectangle of its footprint at real size with its name on it
 // (user decision 2026-11-17: no top-view symbols for now). Rotation is drawn around the centre, ready for REQ-361.
+import type { PointerEvent } from 'react';
 import type { Item } from '../../room/roomPlan';
 
 // Font in ft, scaled so the name fits inside small footprints (about 0.55 ft per character width at 1 ft font).
@@ -8,7 +9,14 @@ export function labelFontSize(name: string, width: number, depth: number): numbe
   return Math.max(0.15, Math.min(0.4, byWidth, depth * 0.45));
 }
 
-export function PlanItem({ item, outline = false }: { item: Pick<Item, 'id' | 'name' | 'position' | 'size' | 'rotation'>; outline?: boolean }) {
+interface PlanItemProps {
+  item: Pick<Item, 'id' | 'name' | 'position' | 'size' | 'rotation'>;
+  outline?: boolean;
+  selected?: boolean;
+  onPointerDown?: (e: PointerEvent<SVGGElement>) => void;
+}
+
+export function PlanItem({ item, outline = false, selected = false, onPointerDown }: PlanItemProps) {
   const { x, y } = item.position;
   const { width, depth } = item.size;
   const font = labelFontSize(item.name, width, depth);
@@ -16,6 +24,9 @@ export function PlanItem({ item, outline = false }: { item: Pick<Item, 'id' | 'n
     <g
       data-testid={outline ? 'drag-outline' : 'plan-item'}
       data-item-id={outline ? undefined : item.id}
+      data-selected={outline ? undefined : selected ? 'true' : 'false'}
+      onPointerDown={outline ? undefined : onPointerDown}
+      style={outline ? undefined : { cursor: 'grab' }}
       transform={`rotate(${item.rotation} ${x} ${y})`}
       pointerEvents={outline ? 'none' : undefined}
     >
@@ -26,8 +37,8 @@ export function PlanItem({ item, outline = false }: { item: Pick<Item, 'id' | 'n
         height={depth}
         fill="#FFFFFF"
         fillOpacity={outline ? 0.6 : 1}
-        stroke={outline ? '#3182CE' : '#2D3748'}
-        strokeWidth={0.05}
+        stroke={outline || selected ? '#3182CE' : '#2D3748'}
+        strokeWidth={selected ? 0.12 : 0.05}
         strokeDasharray={outline ? '0.15 0.1' : undefined}
       />
       {!outline && (

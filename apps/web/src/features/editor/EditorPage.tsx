@@ -6,12 +6,16 @@ import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
 import { useRoomStore } from '../../state/roomStore';
 import { GRID_FT, PlanView } from './PlanView';
 import { CatalogPanel } from './CatalogPanel';
+import { useDragState } from './dragState';
 
 export function EditorPage() {
   const plan = useRoomStore((s) => s.plan);
   const addItem = useRoomStore((s) => s.addItem);
+  const moveItem = useRoomStore((s) => s.moveItem);
+  const selectedId = useDragState((s) => s.selectedItemId);
   if (!plan) return <Navigate to="/" replace />;
   const { width, length } = plan.room;
+  const selected = plan.items.find((it) => it.id === selectedId);
 
   return (
     <Flex direction="column" h="100vh">
@@ -40,13 +44,25 @@ export function EditorPage() {
         </Box>
 
         <Box as="main" flex="1" minW={0} p={4}>
-          <PlanView room={plan.room} items={plan.items} onDropItem={addItem} />
+          <PlanView room={plan.room} items={plan.items} onDropItem={addItem} onMoveItem={moveItem} />
         </Box>
 
         <Box as="aside" aria-label="Selected item" w="220px" p={4} borderLeftWidth="1px">
           <Heading as="h2" size="xs" mb={1}>SELECTED ITEM</Heading>
-          <Text color="gray.600">(nothing selected)</Text>
-          <Text mt={2}>Add furniture from the catalog on the left.</Text>
+          {selected ? (
+            <Box data-testid="selected-item">
+              <Text fontWeight="bold">{selected.name}</Text>
+              <Text>W {selected.size.width}  D {selected.size.depth}  H {selected.size.height} ft</Text>
+              <Text>Centre  X {selected.position.x.toFixed(2)}  Y {selected.position.y.toFixed(2)}</Text>
+              <Text>Rotation  {selected.rotation} deg</Text>
+              <Text mt={2} color="gray.600">Drag to move. Moves snap to 0.25 ft.</Text>
+            </Box>
+          ) : (
+            <>
+              <Text color="gray.600">(nothing selected)</Text>
+              <Text mt={2}>Add furniture from the catalog on the left.</Text>
+            </>
+          )}
         </Box>
       </Flex>
     </Flex>

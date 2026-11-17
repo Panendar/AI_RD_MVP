@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { footprintBounds, isInsideRoom, nextItemId, placeInRoom, snap } from '../../src/room/placement';
+import { clampCentre, footprintBounds, isInsideRoom, nextItemId, placeInRoom, snap } from '../../src/room/placement';
 
 const room = { width: 12, length: 10 };
 const sofa = { width: 6.5, depth: 3.0 };
@@ -49,5 +49,28 @@ describe('placement', () => {
     const b90 = footprintBounds({ position: { x: 5, y: 5 }, size: { width: 6.5, depth: 3, height: 1 }, rotation: 90 });
     expect(b90.minX).toBeCloseTo(3.5);
     expect(b90.maxY).toBeCloseTo(8.25);
+  });
+});
+
+describe('clampCentre (REQ-360)', () => {
+  const size = { width: 6.5, depth: 3.0, height: 2.75 };
+  it('snaps to 0.25 ft', () => {
+    expect(clampCentre(room, { size, rotation: 0 }, { x: 6.1, y: 4.6 })).toEqual({ x: 6, y: 4.5 });
+  });
+  it('stops at the walls, touching them', () => {
+    expect(clampCentre(room, { size, rotation: 0 }, { x: 99, y: -5 })).toEqual({ x: 8.75, y: 1.5 });
+    expect(clampCentre(room, { size, rotation: 0 }, { x: -3, y: 99 })).toEqual({ x: 3.25, y: 8.5 });
+  });
+  it('uses the rotated footprint', () => {
+    const c = clampCentre(room, { size, rotation: 90 }, { x: 99, y: 99 })!;
+    expect(c).toEqual({ x: 10.5, y: 6.75 });
+  });
+  it('keeps multiples of 0.25 for odd sizes (locker 1.75 deep)', () => {
+    const c = clampCentre(room, { size: { width: 3, depth: 1.75, height: 6.5 }, rotation: 0 }, { x: 5, y: 99 })!;
+    expect(c.y % 0.25).toBe(0);
+    expect(c.y + 0.875).toBeLessThanOrEqual(10);
+  });
+  it('returns null when the item cannot fit', () => {
+    expect(clampCentre({ width: 6, length: 6 }, { size: { width: 7, depth: 1, height: 1 }, rotation: 0 }, { x: 3, y: 3 })).toBeNull();
   });
 });

@@ -34,6 +34,26 @@ export function placeInRoom(
   return x === null || y === null ? null : { x, y };
 }
 
+// Where a moved item lands (REQ-360): the point is snapped to 0.25 ft, then the centre is clamped so the rotated footprint
+// stays inside the walls (the item stops touching the wall). The clamp range is rounded inward to the grid, so the position
+// stays a multiple of 0.25 ft. Returns null when the item cannot fit in the room at all.
+export function clampCentre(
+  room: Pick<Room, 'width' | 'length'>,
+  item: Pick<Item, 'size' | 'rotation'>,
+  point: Point
+): Point | null {
+  const b = footprintBounds({ position: { x: 0, y: 0 }, size: item.size, rotation: item.rotation });
+  const axis = (v: number, half: number, max: number): number | null => {
+    const lo = ceilSnap(half);
+    const hi = floorSnap(max - half);
+    if (lo > hi + EPS) return null;
+    return Math.min(Math.max(snap(v), lo), hi);
+  };
+  const x = axis(point.x, b.maxX, room.width);
+  const y = axis(point.y, b.maxY, room.length);
+  return x === null || y === null ? null : { x, y };
+}
+
 // item-<n>, one more than the highest existing number.
 export function nextItemId(items: Pick<Item, 'id'>[]): string {
   const max = items.reduce((m, it) => {

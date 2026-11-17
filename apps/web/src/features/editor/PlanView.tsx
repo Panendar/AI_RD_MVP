@@ -3,7 +3,7 @@
 // Items (REQ-359) are drawn on top as white rectangles with their name. When `onDropItem` is given, the plan is a drop
 // target for catalog items: while dragging, a real-size outline shows where the item would land (snapped, stopped at walls).
 // Later stories (moves, clearance) draw on top of this.
-import { useRef, useState, type DragEvent } from 'react';
+import { useRef, useState, type DragEvent, type PointerEvent } from 'react';
 import type { Item, Point, Room } from '../../room/roomPlan';
 import { getCatalogEntry } from '../../room/catalog';
 import { placeInRoom } from '../../room/placement';
@@ -26,16 +26,40 @@ export interface PlanViewProps {
   room: Room;
   items?: Item[];
   onDropItem?: (catalogId: string, drop: Point) => void;
+  // When given, items can be moved by dragging (REQ-360). Clicking an item always selects it.
+  onMoveItem?: (itemId: string, to: Point) => void;
 }
 
-export function PlanView({ room, items = [], onDropItem }: PlanViewProps) {
+export function PlanView({ room, items = [], onDropItem, onMoveItem }: PlanViewProps) {
   const { width, length, walls } = room;
   const svgRef = useRef<SVGSVGElement>(null);
   const draggingId = useDragState((s) => s.draggingCatalogId);
   const setDragging = useDragState((s) => s.setDragging);
   const [preview, setPreview] = useState<{ name: string; position: Point; size: Item['size'] } | null>(null);
 
-  const pointOf = (e: DragEvent): Point | null => (svgRef.current ? toPlanPoint(svgRef.current, e.clientX, e.clientY) : null);
+  const selectedId = useDragState((s) => s.selectedItemId);
+  const selectItem = useDragState((s) => s.selectItem);
+  // an item drag in progress: which item, and the offset between the pointer and the item's centre
+  const moving = useRef<{ id: string; dx: number; dy: number } | null>(null);
+
+  const planPoint = (e: { clientX: number; clientY: number }): Point | null => (svgRef.current ? toPlanPoint(svgRef.current, e.clientX, e.clientY) : null);
+  const onItemDown = (item: Item) => (e: PointerEvent<SVGGElement>) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    selectItem(item.id);
+    const p = planPoint(e);
+    if (!onMoveItem || !p) return;
+    moving.current = { id: item.id, dx: item.position.x - p.x, dy: item.position.y - p.y };
+    try { svgRef.current?.setPointerCapture?.(e.pointerId); } catch { /* not capturable */ }
+  };
+  const onPointerMove = (e: PointerEvent<SVGSVGElement>) => {
+    const m = moving.current;
+    if (!m || !onMoveItem) return;
+    const p = planPoint(e);
+    if (p) onMoveItem(m.id, { x: p.x + m.dx, y: p.y + m.dy });
+  };
+  const endMove = () => { moving.current = null; };
+
+  const pointOf =(e: DragEvent): Point | null => (svgRef.current ? toPlanPoint(svgRef.current, e.clientX, e.clientY) : null);
   const isCatalogDrag = (e: DragEvent) => draggingId !== null || Array.from(e.dataTransfer?.types ?? []).includes(CATALOG_DRAG_TYPE);
 
   const onDragOver = (e: DragEvent<SVGSVGElement>) => {
@@ -77,9 +101,12 @@ export function PlanView({ room, items = [], onDropItem }: PlanViewProps) {
       onDragOver={onDragOver}
       onDrop={onDrop}
       onDragLeave={clear}
+      onPointerMove={onPointerMove}
+      onPointerUp={endMove}
+      onPointerCancel={endMove}
       viewBox={vb}
       preserveAspectRatio="xMidYMid meet"
-      style={{ width: '100%', height: '100%', display: 'block' }}
+      style={{ width: '100%', height: '100%', display: 'block', touchAction: 'none' }}
     >
       <rect data-testid="plan-floor" x={0} y={0} width={width} height={length} fill="white" />
 
@@ -89,7 +116,7 @@ export function PlanView({ room, items = [], onDropItem }: PlanViewProps) {
 
       {/* items under the walls, so a wall line stays visible where an item touches it */}
       <g data-testid="plan-items">
-        {items.map((it) => <PlanItem key={it.id} item={it} />)}
+        {items.map((it) => <PlanItem key={it.id} item={it} selected={it.id === selectedId} onPointerDown={onItemDown(it)} />)}
       </g>
       {preview && <PlanItem outline item={{ id: 'drag-outline', rotation: 0, ...preview }} />}
 

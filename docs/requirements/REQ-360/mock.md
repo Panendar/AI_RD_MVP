@@ -47,6 +47,6 @@
 - Position = centre of the item footprint, from the top-left corner (room-plan-schema.md).
 - A drop closer than 1.5 ft to another item follows the clearance rule (REQ-366).
 - Dragging past a wall stops the item at the wall (user decision, 2026-11-16).
-- Open questions: arrow keys; multi-select; how to deselect.
+- Out of scope for this requirement: arrow keys, multi-select, a specific way to deselect.
 - Reference: ai-room-redesign UI Mock 16 and 18.
 - Based on features.md #4 Edit the 2D plan.

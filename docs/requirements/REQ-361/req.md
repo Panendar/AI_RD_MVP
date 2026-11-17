@@ -30,6 +30,12 @@ As a homeowner or interior designer, I can rotate and delete a selected furnitur
 - docs/project/intent.md: G1
 - User answers, 2026-11-16: 10° rotation steps with the mouse; no resizing; delete asks for confirmation
 
-## Open questions
-- Is there undo (for example Ctrl+Z) after a confirmed delete?
-- Can an exact angle be typed in the panel (still in 10° steps)?
+## Scope
+Not part of the approved acceptance criteria and not required here: undo after a confirmed delete (for example Ctrl+Z), and typing an exact angle in the panel. Either needs a new decision and requirement.
+
+## Questions resolved
+- Rotation step with the mouse: 10° (user answer, 2026-11-16).
+- Resizing: not offered (user answer, 2026-11-16).
+- Delete: asks for confirmation first (user answer, 2026-11-16).
+- Rotation near other items: handled by the clearance rule, REQ-366.
+- No other questions are recorded in KNM for this requirement (no Q&A entries; gate open). Undo and typing an angle are out of scope (see Scope).
